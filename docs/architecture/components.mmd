@@ -1,6 +1,6 @@
 flowchart LR
     UI[Web UI\nReact + Vite] --> API[API + WebSocket\nFastify]
-    SDK[SDK / CLI / Agentes externos] --> API
+    SDK[SDK / CLI / External agents] --> API
 
     subgraph ControlPlane[Control plane]
         AUTH[Auth + RBAC + Policy]
@@ -25,7 +25,7 @@ flowchart LR
     AGENT --> REDIS[(Redis + BullMQ)]
     PROJECT --> S3[(MinIO / S3\noriginals + variants)]
 
-    subgraph Workers[Workers isolados]
+    subgraph Workers[Isolated workers]
         PROBE[Probe / metadata]
         MEDIA[Proxy / thumbnails / waveform]
         AI[Transcription / analysis / embeddings]

@@ -5,7 +5,7 @@
 
   function normalize(value) {
     return String(value || "")
-      .toLocaleLowerCase("pt-BR")
+      .toLocaleLowerCase("en-US")
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
   }
@@ -21,51 +21,51 @@
 
   function matchPlan(text) {
     var normalized = normalize(text);
-    if ((normalized.indexOf("remov") !== -1 || normalized.indexOf("exclu") !== -1 || normalized.indexOf("apague") !== -1) && (normalized.indexOf("selecion") !== -1 || normalized.indexOf("este clipe") !== -1 || normalized.indexOf("esse clipe") !== -1)) {
+    if ((normalized.indexOf("remov") !== -1 || normalized.indexOf("exclu") !== -1 || normalized.indexOf("apague") !== -1 || normalized.indexOf("delet") !== -1 || normalized.indexOf("erase") !== -1) && (normalized.indexOf("selecion") !== -1 || normalized.indexOf("selected") !== -1 || normalized.indexOf("este clipe") !== -1 || normalized.indexOf("esse clipe") !== -1 || normalized.indexOf("this clip") !== -1)) {
       return {
-        title: "Remover clipe selecionado",
+        title: "Remove selected clip",
         steps: [
-          "Confirmar o clipe selecionado e a track de origem.",
-          "Verificar se a track está desbloqueada.",
-          "Remover o clipe sem alterar o arquivo original.",
-          "Registrar a operação e manter o undo disponível."
+          "Confirm the selected clip and its source track.",
+          "Verify that the track is unlocked.",
+          "Remove the clip without changing the original file.",
+          "Log the operation and keep undo available."
         ],
         operation: { type: "timeline.remove-selected" }
       };
     }
     if (normalized.indexOf("divid") !== -1 || normalized.indexOf("separ") !== -1 || normalized.indexOf("split") !== -1) {
       return {
-        title: "Dividir clipe no playhead",
+        title: "Split clip at playhead",
         steps: [
-          "Confirmar o clipe selecionado e a posição atual do playhead.",
-          "Validar que o playhead está dentro do clipe.",
-          "Criar dois clipes não destrutivos no mesmo arquivo de origem.",
-          "Registrar a operação e manter o undo disponível."
+          "Confirm the selected clip and the current playhead position.",
+          "Validate that the playhead is inside the clip.",
+          "Create two non-destructive clips from the same source file.",
+          "Log the operation and keep undo available."
         ],
         operation: { type: "timeline.split-selected" }
       };
     }
-    if (normalized.indexOf("silenc") !== -1 || normalized.indexOf("pausas") !== -1) {
+    if (normalized.indexOf("silenc") !== -1 || normalized.indexOf("paus") !== -1) {
       return {
-        title: "Remoção de silêncios",
+        title: "Remove silences",
         steps: [
-          "Analisar a faixa de áudio da sequência ativa.",
-          "Encontrar silêncios maiores que 800 ms.",
-          "Criar cortes nas regiões detectadas.",
-          "Fechar os espaços da timeline preservando os links.",
-          "Validar a sincronização audiovisual."
+          "Analyze the active sequence audio track.",
+          "Find silences longer than 800 ms.",
+          "Create cuts in the detected regions.",
+          "Close timeline gaps while preserving links.",
+          "Validate audiovisual synchronization."
         ]
       };
     }
     if (normalized.indexOf("vertical") !== -1 || normalized.indexOf("9:16") !== -1 || normalized.indexOf("reels") !== -1 || normalized.indexOf("tiktok") !== -1) {
       return {
-        title: "Reenquadramento vertical",
+        title: "Vertical reframing",
         steps: [
-          "Alterar a proporção da sequência para 9:16.",
-          "Identificar o assunto principal no material disponível.",
-          "Centralizar o enquadramento em 1080 × 1920.",
-          "Criar keyframes simulados quando o assunto se mover.",
-          "Preparar a validação para publicação vertical."
+          "Change the sequence aspect ratio to 9:16.",
+          "Identify the main subject in the available material.",
+          "Center the framing at 1080 × 1920.",
+          "Create simulated keyframes when the subject moves.",
+          "Prepare validation for vertical publishing."
         ],
         operation: {
           type: "sequence.set",
@@ -73,39 +73,39 @@
         }
       };
     }
-    if (normalized.indexOf("legenda") !== -1 || normalized.indexOf("caption") !== -1 || normalized.indexOf("transcri") !== -1) {
+    if (normalized.indexOf("legenda") !== -1 || normalized.indexOf("caption") !== -1 || normalized.indexOf("subtitl") !== -1 || normalized.indexOf("transcri") !== -1) {
       return {
-        title: "Geração de legendas",
+        title: "Generate captions",
         steps: [
-          "Usar a transcrição disponível ou solicitar uma análise de fala.",
-          "Associar palavras a intervalos temporais.",
-          "Quebrar as linhas respeitando a área segura.",
-          "Aplicar um estilo de legenda dinâmica.",
-          "Preparar exportação em SRT e VTT."
+          "Use the available transcript or request speech analysis.",
+          "Associate words with time ranges.",
+          "Break lines within the safe area.",
+          "Apply a dynamic caption style.",
+          "Prepare SRT and VTT exports."
         ]
       };
     }
-    if (normalized.indexOf("audio") !== -1 || normalized.indexOf("som") !== -1 || normalized.indexOf("volume") !== -1 || normalized.indexOf("ruido") !== -1) {
+    if (normalized.indexOf("audio") !== -1 || normalized.indexOf("som") !== -1 || normalized.indexOf("sound") !== -1 || normalized.indexOf("volume") !== -1 || normalized.indexOf("noise") !== -1 || normalized.indexOf("ruido") !== -1) {
       return {
-        title: "Ajuste de áudio",
+        title: "Adjust audio",
         steps: [
-          "Analisar níveis e possíveis trechos com ruído.",
-          "Aplicar redução de ruído de forma não destrutiva.",
-          "Normalizar o loudness para a meta do projeto.",
-          "Verificar clipping e picos verdadeiros.",
-          "Reproduzir uma prévia para revisão."
+          "Analyze levels and possible noisy sections.",
+          "Apply non-destructive noise reduction.",
+          "Normalize loudness to the project target.",
+          "Check clipping and true peaks.",
+          "Play a preview for review."
         ]
       };
     }
-    if (normalized.indexOf("melhores") !== -1 || normalized.indexOf("melhor momento") !== -1 || normalized.indexOf("corte") !== -1 || normalized.indexOf("60 segundos") !== -1) {
+    if (normalized.indexOf("melhores") !== -1 || normalized.indexOf("melhor momento") !== -1 || normalized.indexOf("best") !== -1 || normalized.indexOf("highlight") !== -1 || normalized.indexOf("corte") !== -1 || normalized.indexOf("cut") !== -1 || normalized.indexOf("60 segundos") !== -1) {
       return {
-        title: "Seleção de melhores momentos",
+        title: "Select highlights",
         steps: [
-          "Inspecionar transcript, cenas e qualidade técnica.",
-          "Pontuar clareza da fala, energia e força de abertura.",
-          "Selecionar trechos sem repetições desnecessárias.",
-          "Montar uma sequência de até 60 segundos.",
-          "Apresentar o diff antes de qualquer alteração."
+          "Inspect the transcript, scenes, and technical quality.",
+          "Score speech clarity, energy, and opening strength.",
+          "Select sections without unnecessary repetition.",
+          "Build a sequence up to 60 seconds.",
+          "Present the diff before any change."
         ]
       };
     }
@@ -120,7 +120,7 @@
     currentState.agent.messages.push(userMessage);
 
     if (!planDefinition) {
-      var unknown = createMessage("assistant", "Não consegui transformar essa instrução em um plano. Descreva o resultado desejado com mais detalhes.");
+      var unknown = createMessage("assistant", "I could not turn that instruction into a plan. Describe the desired result in more detail.");
       currentState.agent.messages.push(unknown);
       currentState.agent.status = "idle";
       AC.project.touch(currentState, "agent.message");
@@ -144,7 +144,7 @@
       confidence: 0.91,
       createdAt: AC.project.now()
     };
-    var assistantMessage = createMessage("assistant", planDefinition.operation ? "Plano criado. A operação ficará aguardando sua aprovação." : "Plano criado. Este pedido precisa de análise de mídia antes de executar qualquer alteração.");
+    var assistantMessage = createMessage("assistant", planDefinition.operation ? "Plan created. The operation is waiting for your approval." : "Plan created. This request needs media analysis before any change can run.");
     currentState.agent.messages.push(assistantMessage);
     currentState.agent.plans.push(plan);
     currentState.agent.status = "planned";
@@ -153,7 +153,7 @@
     AC.project.commitCommand(currentState, {
       log: {
         type: "agent.plan.add",
-        label: "Adicionar plano do agente",
+        label: "Add agent plan",
         details: plan.title
       },
       undo: function () {
@@ -190,25 +190,25 @@
 
   function approveLatest(currentState) {
     var plan = currentState.agent.plans[currentState.agent.plans.length - 1];
-    if (!plan) return { ok: false, message: "Nenhum plano disponível." };
+    if (!plan) return { ok: false, message: "No plan available." };
     if (plan.status === "applied" || plan.status === "reviewed") {
-      return { ok: false, message: "Este plano já foi encerrado." };
+      return { ok: false, message: "This plan is already closed." };
     }
     var previousPlanStatus = plan.status;
     var previousAgentStatus = currentState.agent.status;
-    var execution = { ok: true, changed: false, message: "Plano marcado como revisado." };
+    var execution = { ok: true, changed: false, message: "Plan marked as reviewed." };
     if (plan.operation) {
       execution = AC.timeline.applyAgentOperation(currentState, plan.operation);
       if (!execution.ok) {
         currentState.agent.status = "idle";
-        currentState.agent.messages.push(createMessage("assistant", "Não executei o plano: " + execution.message));
+        currentState.agent.messages.push(createMessage("assistant", "I did not execute the plan: " + execution.message));
         AC.project.touch(currentState, "agent.plan.blocked");
         return execution;
       }
     }
 
     var nextStatus = plan.operation ? "applied" : "reviewed";
-    var responseMessage = createMessage("assistant", plan.operation ? execution.message + " O arquivo original continua intacto." : "Plano marcado como revisado. A execução depende de transcript, análise ou outro dado que ainda não está disponível.");
+    var responseMessage = createMessage("assistant", plan.operation ? execution.message + " The original file remains untouched." : "Plan marked as reviewed. Execution depends on a transcript, analysis, or other data that is not available yet.");
     var operationCommand = plan.operation && execution.changed ? currentState.history.undoStack[currentState.history.undoStack.length - 1] : null;
     var wrappedOperation = Boolean(operationCommand && operationCommand.log && operationCommand.log.type.indexOf("agent.operation.") === 0);
 
@@ -239,7 +239,7 @@
       AC.project.commitCommand(currentState, {
         log: {
           type: "agent.plan.approval",
-          label: nextStatus === "applied" ? "Aprovar plano do agente" : "Revisar plano do agente",
+          label: nextStatus === "applied" ? "Approve agent plan" : "Review agent plan",
           details: plan.title
         },
         undo: function () {
@@ -309,7 +309,7 @@
     bullet.innerHTML = '<svg aria-hidden="true"><use href="#icon-' + (message.role === "user" ? "spark" : "spark") + '"></use></svg>';
     var content = document.createElement("div");
     var author = document.createElement("strong");
-    author.textContent = message.role === "user" ? "Você" : "AgentCut Runtime";
+    author.textContent = message.role === "user" ? "You" : "AgentCut Runtime";
     var text = document.createElement("p");
     text.textContent = message.text;
     content.appendChild(author);
@@ -344,7 +344,7 @@
     if (latestPlan) {
       planCard.hidden = false;
       planTitle.textContent = latestPlan.title;
-      planStatus.textContent = latestPlan.status === "applied" ? "EXECUTADO" : latestPlan.status === "reviewed" ? "REVISADO" : latestPlan.executable ? "AGUARDANDO APROVAÇÃO" : "PLANO";
+      planStatus.textContent = latestPlan.status === "applied" ? "APPLIED" : latestPlan.status === "reviewed" ? "REVIEWED" : latestPlan.executable ? "AWAITING APPROVAL" : "PLAN";
       planStatus.classList.toggle("is-approved", latestPlan.status === "reviewed" || latestPlan.status === "applied");
       planStatus.classList.toggle("is-applied", latestPlan.status === "applied");
       planSteps.replaceChildren();
@@ -353,18 +353,18 @@
         li.textContent = step;
         planSteps.appendChild(li);
       });
-      planConfidence.textContent = latestPlan.status === "applied" ? "Executado com undo disponível" : latestPlan.status === "reviewed" ? "Revisado, sem execução automática" : latestPlan.executable ? "Operação local segura, aprovação necessária" : "Requer dados de mídia, sem alteração automática";
+      planConfidence.textContent = latestPlan.status === "applied" ? "Applied with undo available" : latestPlan.status === "reviewed" ? "Reviewed, no automatic execution" : latestPlan.executable ? "Safe local operation, approval required" : "Requires media data, no automatic change";
       var approveButton = document.getElementById("approve-plan-button");
       if (approveButton) {
         approveButton.disabled = latestPlan.status === "applied" || latestPlan.status === "reviewed";
-        approveButton.textContent = latestPlan.status === "applied" ? "Executado" : latestPlan.status === "reviewed" ? "Revisado" : latestPlan.executable ? "Aprovar e executar" : "Marcar como revisado";
+        approveButton.textContent = latestPlan.status === "applied" ? "Applied" : latestPlan.status === "reviewed" ? "Reviewed" : latestPlan.executable ? "Approve and run" : "Mark as reviewed";
       }
     } else {
       planCard.hidden = true;
     }
 
     status.classList.toggle("is-working", currentState.agent.status === "working");
-    status.lastChild.textContent = currentState.agent.status === "planned" ? " Plano pronto" : currentState.agent.status === "working" ? " Preparando plano" : " Pronto";
+    status.lastChild.textContent = currentState.agent.status === "planned" ? " Plan ready" : currentState.agent.status === "working" ? " Preparing plan" : " Ready";
 
     var log = currentState.history.log.filter(function (entry) {
       return entry.type && entry.type.indexOf("agent.") === 0;
@@ -388,9 +388,9 @@
 
   function formatTime(value) {
     try {
-      return new Date(value).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+      return new Date(value).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
     } catch (error) {
-      return "agora";
+      return "now";
     }
   }
 

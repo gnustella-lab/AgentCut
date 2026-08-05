@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0c0f14">
-  <meta name="description" content="AgentCut, protótipo de editor de vídeo orientado a agentes de IA.">
+  <meta name="description" content="AgentCut, an AI-agent-oriented video editing studio prototype.">
   <title>AgentCut Studio</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -20,45 +20,45 @@
       </div>
 
       <div class="project-context">
-        <span class="context-label">PROJETO</span>
-        <strong id="project-name-display">Projeto sem título</strong>
+        <span class="context-label">PROJECT</span>
+        <strong id="project-name-display">Untitled project</strong>
         <span class="project-dot" aria-hidden="true"></span>
       </div>
 
       <div class="topbar-actions">
         <button class="button button-quiet" id="new-project-button" type="button">
           <svg aria-hidden="true"><use href="#icon-plus"></use></svg>
-          <span>Novo projeto</span>
+          <span>New project</span>
         </button>
-        <button class="icon-button" id="save-project-button" type="button" aria-label="Salvar projeto" title="Salvar projeto (Ctrl+S)">
+        <button class="icon-button" id="save-project-button" type="button" aria-label="Save project" title="Save project (Ctrl+S)">
           <svg aria-hidden="true"><use href="#icon-save"></use></svg>
         </button>
         <span class="action-divider" aria-hidden="true"></span>
-        <button class="icon-button" id="undo-button" type="button" aria-label="Desfazer" title="Desfazer (Ctrl+Z)">
+        <button class="icon-button" id="undo-button" type="button" aria-label="Undo" title="Undo (Ctrl+Z)">
           <svg aria-hidden="true"><use href="#icon-undo"></use></svg>
         </button>
-        <button class="icon-button" id="redo-button" type="button" aria-label="Refazer" title="Refazer (Ctrl+Shift+Z)">
+        <button class="icon-button" id="redo-button" type="button" aria-label="Redo" title="Redo (Ctrl+Shift+Z)">
           <svg aria-hidden="true"><use href="#icon-redo"></use></svg>
         </button>
         <button class="button button-accent" id="export-project-button" type="button">
           <svg aria-hidden="true"><use href="#icon-download"></use></svg>
-          <span>Exportar</span>
+          <span>Export</span>
         </button>
         <div class="status-pill status-ready" id="project-status" role="status" aria-live="polite">
           <span class="status-dot" aria-hidden="true"></span>
-          <span class="status-label">Projeto pronto</span>
+          <span class="status-label">Project ready</span>
         </div>
       </div>
     </header>
 
     <main class="workspace">
-      <aside class="panel media-panel" id="media-panel" aria-label="Biblioteca de mídia">
+      <aside class="panel media-panel" id="media-panel" aria-label="Media library">
         <div class="panel-header">
           <div class="panel-title-group">
             <span class="eyebrow">ASSETS</span>
-            <h2><svg aria-hidden="true"><use href="#icon-folder"></use></svg> Mídia</h2>
+            <h2><svg aria-hidden="true"><use href="#icon-folder"></use></svg> Media</h2>
           </div>
-          <button class="panel-collapse" type="button" data-collapse="media" aria-label="Recolher biblioteca de mídia" title="Recolher painel">
+          <button class="panel-collapse" type="button" data-collapse="media" aria-label="Collapse media library" title="Collapse panel">
             <svg aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
           </button>
         </div>
@@ -67,11 +67,11 @@
           <div class="media-import-actions">
             <button class="button button-small button-secondary" id="import-video-button" type="button">
               <svg aria-hidden="true"><use href="#icon-video"></use></svg>
-              Vídeo
+              Video
             </button>
             <button class="button button-small button-secondary" id="import-audio-button" type="button">
               <svg aria-hidden="true"><use href="#icon-music"></use></svg>
-              Áudio
+              Audio
             </button>
             <input id="video-input" type="file" accept="video/*,image/*" multiple hidden>
             <input id="audio-input" type="file" accept="audio/*" multiple hidden>
@@ -79,37 +79,37 @@
 
           <label class="search-field" for="media-search">
             <svg aria-hidden="true"><use href="#icon-search"></use></svg>
-            <span class="sr-only">Buscar mídia</span>
-            <input id="media-search" type="search" placeholder="Buscar mídia" autocomplete="off">
+            <span class="sr-only">Search media</span>
+            <input id="media-search" type="search" placeholder="Search media" autocomplete="off">
             <kbd>/</kbd>
           </label>
 
           <div class="library-meta">
-            <span id="media-count">0 arquivos</span>
-            <button class="text-button" id="clear-media-search" type="button" hidden>Limpar</button>
+            <span id="media-count">0 files</span>
+            <button class="text-button" id="clear-media-search" type="button" hidden>Clear</button>
           </div>
 
           <div class="media-list" id="media-list" aria-live="polite">
             <div class="empty-state empty-state-media" id="media-empty-state">
               <div class="empty-icon"><svg aria-hidden="true"><use href="#icon-upload"></use></svg></div>
-              <strong>Sua biblioteca está vazia</strong>
-              <p>Importe um vídeo, áudio ou imagem para começar.</p>
-              <button class="text-button" id="empty-import-button" type="button">Importar primeiro asset</button>
+              <strong>Your library is empty</strong>
+              <p>Import a video, audio, or image to get started.</p>
+              <button class="text-button" id="empty-import-button" type="button">Import your first asset</button>
             </div>
           </div>
         </div>
       </aside>
 
-      <section class="editor-column" aria-label="Área de edição">
-        <section class="preview-panel" aria-label="Player de pré-visualização">
+      <section class="editor-column" aria-label="Editing area">
+        <section class="preview-panel" aria-label="Preview player">
           <div class="preview-header">
             <div>
               <span class="eyebrow">PREVIEW</span>
-              <h1 id="preview-title">Nenhuma mídia selecionada</h1>
+              <h1 id="preview-title">No media selected</h1>
             </div>
             <div class="preview-header-tools">
               <span class="preview-badge" id="preview-format-badge">PROXY · 1/2</span>
-              <button class="icon-button icon-button-small" id="fullscreen-button" type="button" aria-label="Tela cheia" title="Tela cheia">
+              <button class="icon-button icon-button-small" id="fullscreen-button" type="button" aria-label="Fullscreen" title="Fullscreen">
                 <svg aria-hidden="true"><use href="#icon-expand"></use></svg>
               </button>
             </div>
@@ -119,17 +119,17 @@
             <div class="preview-grid" aria-hidden="true"></div>
             <div class="safe-zone safe-zone-vertical" aria-hidden="true"></div>
             <video id="preview-video" playsinline preload="metadata" hidden></video>
-            <img id="preview-image" alt="Pré-visualização da imagem selecionada" hidden>
+            <img id="preview-image" alt="Preview of the selected image" hidden>
             <audio id="audio-preview" preload="metadata"></audio>
             <div class="audio-preview-visual" id="audio-preview-visual" hidden>
               <div class="audio-art"><svg aria-hidden="true"><use href="#icon-waveform"></use></svg></div>
-              <span>Pré-visualização de áudio</span>
-              <small id="audio-preview-name">Nenhum áudio selecionado</small>
+              <span>Audio preview</span>
+              <small id="audio-preview-name">No audio selected</small>
             </div>
             <div class="preview-empty" id="preview-empty">
               <div class="preview-empty-icon"><svg aria-hidden="true"><use href="#icon-play"></use></svg></div>
-              <strong>Selecione uma mídia para visualizar</strong>
-              <span>O preview usa apenas arquivos locais em memória.</span>
+              <strong>Select media to preview</strong>
+              <span>Preview uses only local files held in memory.</span>
             </div>
             <div class="preview-overlay-top">
               <span class="overlay-chip"><span class="live-dot"></span> LOCAL PREVIEW</span>
@@ -142,19 +142,19 @@
 
           <div class="transport-bar">
             <div class="transport-main">
-              <button class="transport-button" id="skip-back-button" type="button" aria-label="Voltar cinco segundos" title="Voltar 5 segundos">
+              <button class="transport-button" id="skip-back-button" type="button" aria-label="Go back five seconds" title="Go back 5 seconds">
                 <svg aria-hidden="true"><use href="#icon-back"></use></svg>
               </button>
-              <button class="transport-button transport-play" id="play-pause-button" type="button" aria-label="Reproduzir" title="Reproduzir (Espaço)">
+              <button class="transport-button transport-play" id="play-pause-button" type="button" aria-label="Play" title="Play (Space)">
                 <svg aria-hidden="true"><use href="#icon-play"></use></svg>
               </button>
-              <button class="transport-button" id="skip-forward-button" type="button" aria-label="Avançar cinco segundos" title="Avançar 5 segundos">
+              <button class="transport-button" id="skip-forward-button" type="button" aria-label="Go forward five seconds" title="Go forward 5 seconds">
                 <svg aria-hidden="true"><use href="#icon-forward"></use></svg>
               </button>
             </div>
             <div class="transport-timeline">
               <span class="transport-time" id="current-time">00:00</span>
-              <input id="player-seek" class="seek-range" type="range" min="0" max="1000" value="0" aria-label="Posição do vídeo">
+              <input id="player-seek" class="seek-range" type="range" min="0" max="1000" value="0" aria-label="Video position">
               <span class="transport-time transport-duration" id="total-time">00:00</span>
             </div>
             <div class="transport-options">
@@ -163,7 +163,7 @@
                 <input id="volume-control" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
               </div>
               <label class="speed-select">
-                <span class="sr-only">Velocidade de reprodução</span>
+                <span class="sr-only">Playback speed</span>
                 <select id="playback-speed">
                   <option value="0.5">0.5×</option>
                   <option value="0.75">0.75×</option>
@@ -177,43 +177,43 @@
           </div>
         </section>
 
-        <section class="inspector-strip" aria-label="Informações do item selecionado">
+        <section class="inspector-strip" aria-label="Selected item information">
           <div class="inspector-section">
-            <span class="eyebrow">SELEÇÃO</span>
-            <strong id="selection-name">Nenhum item selecionado</strong>
+            <span class="eyebrow">SELECTION</span>
+            <strong id="selection-name">No item selected</strong>
           </div>
           <div class="inspector-values">
-            <div><span>TIPO</span><strong id="selection-type">--</strong></div>
-            <div><span>DURAÇÃO</span><strong id="selection-duration">--</strong></div>
-            <div><span>POSIÇÃO</span><strong id="selection-position">--</strong></div>
+            <div><span>TYPE</span><strong id="selection-type">--</strong></div>
+            <div><span>DURATION</span><strong id="selection-duration">--</strong></div>
+            <div><span>POSITION</span><strong id="selection-position">--</strong></div>
           </div>
           <button class="button button-small button-quiet" id="remove-selected-button" type="button" disabled>
             <svg aria-hidden="true"><use href="#icon-trash"></use></svg>
-            Remover seleção
+            Remove selection
           </button>
         </section>
       </section>
 
-      <aside class="panel agent-panel" id="agent-panel" aria-label="Painel do agente de edição">
+      <aside class="panel agent-panel" id="agent-panel" aria-label="Editing agent panel">
         <div class="panel-header agent-panel-header">
           <div class="panel-title-group">
             <span class="eyebrow eyebrow-accent">RUNTIME</span>
-            <h2><span class="agent-spark"><svg aria-hidden="true"><use href="#icon-spark"></use></svg></span> Agente de edição</h2>
+            <h2><span class="agent-spark"><svg aria-hidden="true"><use href="#icon-spark"></use></svg></span> Editing agent</h2>
           </div>
-          <button class="panel-collapse" type="button" data-collapse="agent" aria-label="Recolher painel do agente" title="Recolher painel">
+          <button class="panel-collapse" type="button" data-collapse="agent" aria-label="Collapse agent panel" title="Collapse panel">
             <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
           </button>
         </div>
 
         <div class="panel-content agent-panel-content">
           <div class="agent-mode-row">
-            <label for="agent-mode">Modo</label>
+            <label for="agent-mode">Mode</label>
             <select id="agent-mode">
-              <option value="assistant">Assistente</option>
-              <option value="copilot">Copiloto</option>
-              <option value="supervised">Autônomo supervisionado</option>
+              <option value="assistant">Assistant</option>
+              <option value="copilot">Copilot</option>
+              <option value="supervised">Supervised autonomy</option>
             </select>
-            <span class="agent-status" id="agent-status"><span></span> Pronto</span>
+            <span class="agent-status" id="agent-status"><span></span> Ready</span>
           </div>
 
           <div class="agent-messages" id="agent-messages" aria-live="polite"></div>
@@ -221,35 +221,35 @@
           <div class="agent-plan-card" id="agent-plan-card" hidden>
             <div class="plan-card-header">
               <div>
-                <span class="eyebrow eyebrow-accent">PLANO PROPOSTO</span>
-                <strong id="agent-plan-title">Plano de edição</strong>
+                <span class="eyebrow eyebrow-accent">PROPOSED PLAN</span>
+                <strong id="agent-plan-title">Editing plan</strong>
               </div>
-              <span class="plan-status" id="agent-plan-status">SIMULAÇÃO</span>
+              <span class="plan-status" id="agent-plan-status">SIMULATION</span>
             </div>
             <ol class="plan-steps" id="agent-plan-steps"></ol>
             <div class="plan-card-footer">
-              <span id="agent-plan-confidence">Simulado, sem alterações reais</span>
-              <button class="text-button" id="approve-plan-button" type="button">Marcar como revisado</button>
+              <span id="agent-plan-confidence">Simulation, no real changes</span>
+              <button class="text-button" id="approve-plan-button" type="button">Mark as reviewed</button>
             </div>
           </div>
 
           <div class="agent-examples">
-            <span class="eyebrow">EXEMPLOS RÁPIDOS</span>
+            <span class="eyebrow">QUICK EXAMPLES</span>
             <div class="example-chips">
-              <button type="button" data-agent-example="Remova o clipe selecionado.">Remover clipe</button>
-              <button type="button" data-agent-example="Divida o clipe selecionado no playhead.">Dividir no playhead</button>
-              <button type="button" data-agent-example="Crie um vídeo vertical de até 60 segundos.">Corte vertical</button>
-              <button type="button" data-agent-example="Remova os silêncios maiores que 800 ms.">Remover silêncios</button>
-              <button type="button" data-agent-example="Gere legendas dinâmicas.">Gerar legendas</button>
+              <button type="button" data-agent-example="Remove the selected clip.">Remove clip</button>
+              <button type="button" data-agent-example="Split the selected clip at the playhead.">Split at playhead</button>
+              <button type="button" data-agent-example="Create a vertical video up to 60 seconds.">Vertical crop</button>
+              <button type="button" data-agent-example="Remove silences longer than 800 ms.">Remove silences</button>
+              <button type="button" data-agent-example="Generate dynamic captions.">Generate captions</button>
             </div>
           </div>
 
           <form class="agent-composer" id="agent-form">
-            <label class="sr-only" for="agent-input">Instrução para o agente</label>
-            <textarea id="agent-input" rows="2" placeholder="Diga ao agente o que editar..." spellcheck="true"></textarea>
+            <label class="sr-only" for="agent-input">Agent instruction</label>
+            <textarea id="agent-input" rows="2" placeholder="Tell the agent what to edit..." spellcheck="true"></textarea>
             <div class="composer-footer">
-              <span class="composer-hint"><kbd>Enter</kbd> enviar · <kbd>Shift+Enter</kbd> nova linha</span>
-              <button class="send-button" type="submit" aria-label="Executar instrução" title="Executar instrução">
+              <span class="composer-hint"><kbd>Enter</kbd> send · <kbd>Shift+Enter</kbd> new line</span>
+              <button class="send-button" type="submit" aria-label="Run instruction" title="Run instruction">
                 <svg aria-hidden="true"><use href="#icon-send"></use></svg>
               </button>
             </div>
@@ -257,7 +257,7 @@
 
           <div class="agent-history">
             <div class="history-heading">
-              <span class="eyebrow">ATIVIDADE</span>
+              <span class="eyebrow">ACTIVITY</span>
               <span class="history-count" id="agent-history-count">0</span>
             </div>
             <div class="history-list" id="agent-history-list"></div>
@@ -269,30 +269,30 @@
     <section class="timeline-panel" aria-label="Timeline multipista">
       <div class="timeline-toolbar">
         <div class="timeline-title-group">
-          <span class="eyebrow">SEQUÊNCIA PRINCIPAL</span>
+          <span class="eyebrow">MAIN SEQUENCE</span>
           <strong>Timeline</strong>
           <span class="sequence-badge" id="sequence-badge">1920 × 1080 · 30 fps</span>
         </div>
         <div class="timeline-tools">
           <button class="button button-small button-quiet" id="add-track-button" type="button">
             <svg aria-hidden="true"><use href="#icon-plus"></use></svg>
-            Adicionar track
+            Add track
           </button>
-          <button class="button button-small button-quiet" id="split-selected-button" type="button" disabled title="Dividir o clipe selecionado no playhead">
+          <button class="button button-small button-quiet" id="split-selected-button" type="button" disabled title="Split the selected clip at the playhead">
             <svg aria-hidden="true"><use href="#icon-scissors"></use></svg>
-            Dividir
+            Split
           </button>
           <span class="toolbar-divider" aria-hidden="true"></span>
-          <button class="icon-button icon-button-small" id="zoom-out-button" type="button" aria-label="Diminuir zoom da timeline" title="Diminuir zoom">
+          <button class="icon-button icon-button-small" id="zoom-out-button" type="button" aria-label="Zoom out on timeline" title="Zoom out">
             <svg aria-hidden="true"><use href="#icon-minus"></use></svg>
           </button>
           <span class="zoom-value" id="timeline-zoom-value">100%</span>
-          <button class="icon-button icon-button-small" id="zoom-in-button" type="button" aria-label="Aumentar zoom da timeline" title="Aumentar zoom">
+          <button class="icon-button icon-button-small" id="zoom-in-button" type="button" aria-label="Zoom in on timeline" title="Zoom in">
             <svg aria-hidden="true"><use href="#icon-plus"></use></svg>
           </button>
         </div>
       </div>
-      <div class="timeline-scroll" id="timeline-scroll" tabindex="0" aria-label="Área rolável da timeline">
+      <div class="timeline-scroll" id="timeline-scroll" tabindex="0" aria-label="Scrollable timeline area">
         <div class="timeline-canvas" id="timeline-canvas">
           <div class="timeline-ruler" id="timeline-ruler"></div>
           <div class="timeline-rows" id="timeline-rows"></div>

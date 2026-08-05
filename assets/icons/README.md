@@ -1,3 +1,3 @@
-# Ícones
+# Icons
 
-O protótipo usa SVG inline e APIs nativas do navegador para permanecer portátil ao abrir `index.html` diretamente. Esta pasta fica reservada para futuros assets locais, sem dependências externas.
+The prototype uses inline SVG and native browser APIs to remain portable when opening `index.html` directly. This folder is reserved for future local assets, with no external dependencies.

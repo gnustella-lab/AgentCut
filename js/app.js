@@ -28,11 +28,11 @@
   }
 
   function typeLabel(type) {
-    if (!type) return "ARQUIVO";
-    if (type.indexOf("video/") === 0) return "VÍDEO";
-    if (type.indexOf("audio/") === 0) return "ÁUDIO";
-    if (type.indexOf("image/") === 0) return "IMAGEM";
-    return "ARQUIVO";
+    if (!type) return "FILE";
+    if (type.indexOf("video/") === 0) return "VIDEO";
+    if (type.indexOf("audio/") === 0) return "AUDIO";
+    if (type.indexOf("image/") === 0) return "IMAGE";
+    return "FILE";
   }
 
   function mediaHasLockedClip(mediaId) {
@@ -77,7 +77,7 @@
     if (statusTimer) window.clearTimeout(statusTimer);
     if (kind === "saved") {
       statusTimer = window.setTimeout(function () {
-        if (!currentState.project.dirty) setStatus("ready", "Projeto pronto");
+        if (!currentState.project.dirty) setStatus("ready", "Project ready");
       }, 2600);
     }
   }
@@ -85,9 +85,9 @@
   function renderStatus() {
     if (!currentState) return;
     if (currentState.project.dirty) {
-      setStatus("dirty", "Projeto alterado");
+      setStatus("dirty", "Project changed");
     } else {
-      setStatus("ready", "Projeto pronto");
+      setStatus("ready", "Project ready");
     }
     $("project-name-display").textContent = currentState.project.name;
   }
@@ -98,14 +98,14 @@
     var search = $("media-search");
     var count = $("media-count");
     if (!list || !empty || !search) return;
-    var query = String(search.value || "").trim().toLocaleLowerCase("pt-BR");
+    var query = String(search.value || "").trim().toLocaleLowerCase("en-US");
     var assets = currentState.media.filter(function (item) {
-      return !query || item.name.toLocaleLowerCase("pt-BR").indexOf(query) !== -1;
+      return !query || item.name.toLocaleLowerCase("en-US").indexOf(query) !== -1;
     });
     var previousItems = list.querySelectorAll(".media-item");
     previousItems.forEach(function (item) { item.remove(); });
     empty.hidden = assets.length > 0;
-    count.textContent = currentState.media.length + (currentState.media.length === 1 ? " arquivo" : " arquivos");
+    count.textContent = currentState.media.length + (currentState.media.length === 1 ? " file" : " files");
     $("clear-media-search").hidden = !query;
 
     assets.forEach(function (media) {
@@ -114,14 +114,14 @@
       item.dataset.mediaId = media.id;
       item.tabIndex = 0;
       item.setAttribute("role", "group");
-      item.setAttribute("aria-label", "Selecionar " + media.name);
+      item.setAttribute("aria-label", "Select " + media.name);
 
       var thumb = document.createElement("div");
       thumb.className = "media-thumb " + (media.type.indexOf("audio/") === 0 ? "audio-thumb" : media.type.indexOf("image/") === 0 ? "image-thumb" : "video-thumb");
       if (media.type.indexOf("image/") === 0 && media.objectUrl) {
         var image = document.createElement("img");
         image.src = media.objectUrl;
-        image.alt = "Miniatura de " + media.name;
+        image.alt = "Thumbnail of " + media.name;
         thumb.appendChild(image);
       } else {
         var icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -147,7 +147,7 @@
       var kind = document.createElement("span");
       kind.textContent = typeLabel(media.type);
       var duration = document.createElement("span");
-      duration.textContent = Number(media.duration) > 0 ? formatDuration(media.duration) : "duração pendente";
+      duration.textContent = Number(media.duration) > 0 ? formatDuration(media.duration) : "duration pending";
       var size = document.createElement("span");
       size.textContent = formatBytes(media.size);
       meta.appendChild(kind);
@@ -159,7 +159,7 @@
       if (media.needsReimport && !media.file) {
         var warning = document.createElement("span");
         warning.className = "media-reimport";
-        warning.innerHTML = '<svg aria-hidden="true"><use href="#icon-upload"></use></svg> Reimporte para preview';
+        warning.innerHTML = '<svg aria-hidden="true"><use href="#icon-upload"></use></svg> Reimport for preview';
         details.appendChild(warning);
       }
 
@@ -177,8 +177,8 @@
       removeButton.dataset.mediaAction = "remove";
       removeButton.dataset.mediaId = media.id;
       removeButton.disabled = mediaHasLockedClip(media.id);
-      removeButton.title = removeButton.disabled ? "Desbloqueie a track antes de remover" : "Remover mídia e clipes";
-      removeButton.innerHTML = '<svg aria-hidden="true"><use href="#icon-trash"></use></svg> Remover';
+      removeButton.title = removeButton.disabled ? "Unlock the track before removing" : "Remove media and clips";
+      removeButton.innerHTML = '<svg aria-hidden="true"><use href="#icon-trash"></use></svg> Remove';
       actions.appendChild(addButton);
       actions.appendChild(removeButton);
       details.appendChild(actions);
@@ -197,7 +197,7 @@
     var remove = $("remove-selected-button");
     if (!name || !type || !duration || !position || !remove) return;
     if (!location) {
-      name.textContent = "Nenhum item selecionado";
+      name.textContent = "No item selected";
       type.textContent = "--";
       duration.textContent = "--";
       position.textContent = "--";
@@ -209,7 +209,7 @@
     duration.textContent = formatDuration(location.item.duration);
     position.textContent = formatDuration(location.item.start);
     remove.disabled = location.track.locked;
-    remove.title = location.track.locked ? "Desbloqueie a track antes de remover" : "Remover clipe selecionado";
+    remove.title = location.track.locked ? "Unlock the track before removing" : "Remove selected clip";
   }
 
   function renderActivity() {
@@ -224,7 +224,7 @@
       var label = document.createElement("strong");
       label.textContent = entry.label;
       var detail = document.createElement("time");
-      detail.textContent = (entry.action === "undo" ? "Desfeito · " : entry.action === "redo" ? "Refeito · " : "") + formatClock(entry.timestamp) + (entry.details ? " · " + entry.details : "");
+      detail.textContent = (entry.action === "undo" ? "Undone · " : entry.action === "redo" ? "Redone · " : "") + formatClock(entry.timestamp) + (entry.details ? " · " + entry.details : "");
       body.appendChild(label);
       body.appendChild(detail);
       item.appendChild(body);
@@ -234,9 +234,9 @@
 
   function formatClock(value) {
     try {
-      return new Date(value).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+      return new Date(value).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
     } catch (error) {
-      return "agora";
+      return "now";
     }
   }
 
@@ -283,7 +283,7 @@
     audioVisual.hidden = true;
     empty.hidden = false;
     currentState.previewKind = null;
-    title.textContent = media ? media.name : "Nenhuma mídia selecionada";
+    title.textContent = media ? media.name : "No media selected";
     resolution.textContent = "-- × --";
 
     if (!media) {
@@ -291,7 +291,7 @@
       return;
     }
     if (!media.file || !media.objectUrl) {
-      showToast("Este asset foi restaurado apenas como metadado. Reimporte o arquivo para visualizá-lo.", "error");
+      showToast("This asset was restored as metadata only. Reimport the file to preview it.", "error");
       return;
     }
     empty.hidden = true;
@@ -306,7 +306,7 @@
       currentState.previewKind = "image";
       image.hidden = false;
       image.src = media.objectUrl;
-      resolution.textContent = (media.width && media.height) ? media.width + " × " + media.height : "IMAGEM";
+      resolution.textContent = (media.width && media.height) ? media.width + " × " + media.height : "IMAGE";
     } else if (media.type.indexOf("audio/") === 0) {
       currentState.previewKind = "audio";
       audioVisual.hidden = false;
@@ -315,7 +315,7 @@
       audio.load();
       audio.playbackRate = Number($("playback-speed").value) || 1;
       audio.volume = Number($("volume-control").value) || 1;
-      resolution.textContent = "ÁUDIO";
+      resolution.textContent = "AUDIO";
     }
     updateTransportDisplay();
   }
@@ -371,7 +371,7 @@
   function importFiles(fileList) {
     Array.prototype.forEach.call(fileList || [], function (file) {
       if (!isAcceptedFile(file)) {
-        showToast("Tipo não suportado: " + file.name, "error");
+        showToast("Unsupported type: " + file.name, "error");
         return;
       }
       var record = {
@@ -394,7 +394,7 @@
       AC.project.commitCommand(currentState, {
         log: {
           type: "media.import",
-          label: "Importar mídia",
+          label: "Import media",
           details: record.name
         },
         undo: function () {
@@ -411,7 +411,7 @@
       });
       loadMetadata(record);
       loadSelectedMedia(record);
-      announce("Mídia importada: " + record.name);
+      announce("Media imported: " + record.name);
     });
   }
 
@@ -426,7 +426,7 @@
       });
     });
     if (affected.some(function (entry) { return entry.track.locked; })) {
-      showToast("Desbloqueie as tracks associadas antes de remover esta mídia.", "error");
+      showToast("Unlock the associated tracks before removing this media.", "error");
       return;
     }
     var previousSelectedMediaId = currentState.selectedMediaId;
@@ -447,7 +447,7 @@
     AC.project.commitCommand(currentState, {
       log: {
         type: "media.remove",
-        label: "Remover mídia",
+        label: "Remove media",
         details: media.name
       },
       undo: function () {
@@ -481,7 +481,7 @@
         AC.timeline.recalculateDuration(currentState);
       }
     });
-    showToast("Mídia removida da biblioteca e da timeline.", "success");
+    showToast("Media removed from the library and timeline.", "success");
   }
 
   function updateTransportDisplay() {
@@ -497,23 +497,23 @@
     var playButton = $("play-pause-button");
     if (element && !element.paused) {
       playButton.innerHTML = '<svg aria-hidden="true"><use href="#icon-pause"></use></svg>';
-      playButton.setAttribute("aria-label", "Pausar");
-      playButton.title = "Pausar (Espaço)";
+      playButton.setAttribute("aria-label", "Pause");
+      playButton.title = "Pause (Space)";
     } else {
       playButton.innerHTML = '<svg aria-hidden="true"><use href="#icon-play"></use></svg>';
-      playButton.setAttribute("aria-label", "Reproduzir");
-      playButton.title = "Reproduzir (Espaço)";
+      playButton.setAttribute("aria-label", "Play");
+      playButton.title = "Play (Space)";
     }
   }
 
   function togglePlayback() {
     var element = getActiveMediaElement();
     if (!element) {
-      showToast("Selecione um vídeo ou áudio para reproduzir.", "error");
+      showToast("Select a video or audio to play.", "error");
       return;
     }
     if (element.paused) {
-      element.play().catch(function () { showToast("O navegador bloqueou a reprodução automática. Clique novamente para iniciar.", "error"); });
+      element.play().catch(function () { showToast("The browser blocked autoplay. Click again to start.", "error"); });
     } else {
       element.pause();
     }
@@ -537,39 +537,39 @@
   }
 
   function chooseNewProject() {
-    if (currentState.project.dirty && !window.confirm("O projeto atual tem alterações não salvas. Criar um novo projeto mesmo assim?")) return;
-    var name = window.prompt("Nome do novo projeto", "Projeto sem título");
+    if (currentState.project.dirty && !window.confirm("The current project has unsaved changes. Create a new project anyway?")) return;
+    var name = window.prompt("New project name", "Untitled project");
     if (name === null) return;
     AC.project.revokeMediaUrls(currentState);
-    currentState = AC.project.createInitialState(name.trim() || "Projeto sem título");
+    currentState = AC.project.createInitialState(name.trim() || "Untitled project");
     renderAll();
     loadSelectedMedia(null);
-    setStatus("ready", "Projeto pronto");
-    announce("Novo projeto criado");
-    showToast("Novo projeto criado.", "success");
+    setStatus("ready", "Project ready");
+    announce("New project created");
+    showToast("New project created.", "success");
   }
 
   function saveProject() {
-    setStatus("saving", "Salvando");
+    setStatus("saving", "Saving");
     var success = AC.project.save(currentState);
     if (success) {
-      setStatus("saved", "Salvo");
-      announce("Projeto salvo no armazenamento local");
-      showToast("Metadados salvos localmente.", "success");
+      setStatus("saved", "Saved");
+      announce("Project saved to local storage");
+      showToast("Metadata saved locally.", "success");
     } else {
-      setStatus("error", "Erro");
-      showToast("Não foi possível salvar no localStorage.", "error");
+      setStatus("error", "Error");
+      showToast("Could not save to localStorage.", "error");
     }
   }
 
   function exportProject() {
     try {
       AC.project.exportProject(currentState);
-      announce("Projeto exportado como JSON");
-      showToast("Arquivo .agentcut.json gerado.", "success");
+      announce("Project exported as JSON");
+      showToast(".agentcut.json file generated.", "success");
     } catch (error) {
-      setStatus("error", "Erro");
-      showToast("Não foi possível exportar o projeto.", "error");
+      setStatus("error", "Error");
+      showToast("Could not export the project.", "error");
     }
   }
 
@@ -584,21 +584,21 @@
       var plan = AC.agent.submit(currentState, text);
       input.value = "";
       if (plan) {
-        showToast(plan.executable ? "Plano criado e aguardando aprovação." : "Plano criado, sem execução automática.", "success");
-        announce("Plano do agente criado: " + plan.title);
+        showToast(plan.executable ? "Plan created and awaiting approval." : "Plan created, with no automatic execution.", "success");
+        announce("Agent plan created: " + plan.title);
       } else {
-        showToast("O agente precisa de mais detalhes para criar um plano.", "error");
+        showToast("The agent needs more detail to create a plan.", "error");
       }
     }, 180);
   }
 
   function addTrack() {
-    var value = window.prompt("Tipo da nova track: vídeo, áudio ou texto", "vídeo");
+    var value = window.prompt("New track type: video, audio, or text", "video");
     if (value === null) return;
     var normalized = AC.agent.normalize(value);
-    var type = normalized.indexOf("audio") !== -1 ? "audio" : normalized.indexOf("texto") !== -1 ? "text" : "video";
+    var type = normalized.indexOf("audio") !== -1 ? "audio" : (normalized.indexOf("text") !== -1 || normalized.indexOf("texto") !== -1) ? "text" : "video";
     AC.timeline.addTrack(currentState, type);
-    showToast("Nova track adicionada.", "success");
+    showToast("New track added.", "success");
   }
 
   function bindMediaEvents() {
@@ -667,8 +667,8 @@
     $("new-project-button").addEventListener("click", chooseNewProject);
     $("save-project-button").addEventListener("click", saveProject);
     $("export-project-button").addEventListener("click", exportProject);
-    $("undo-button").addEventListener("click", function () { if (AC.project.undo(currentState)) announce("Alteração desfeita"); });
-    $("redo-button").addEventListener("click", function () { if (AC.project.redo(currentState)) announce("Alteração refeita"); });
+    $("undo-button").addEventListener("click", function () { if (AC.project.undo(currentState)) announce("Change undone"); });
+    $("redo-button").addEventListener("click", function () { if (AC.project.redo(currentState)) announce("Change redone"); });
     $("remove-selected-button").addEventListener("click", function () { AC.timeline.removeSelected(currentState); });
     $("add-track-button").addEventListener("click", addTrack);
     $("zoom-in-button").addEventListener("click", function () { AC.timeline.setZoom(currentState, 0.1); });
@@ -684,7 +684,7 @@
     $("approve-plan-button").addEventListener("click", function () {
       var result = AC.agent.approveLatest(currentState);
       if (result && result.ok) {
-        showToast(result.executed ? "Plano aprovado e executado. O undo continua disponível." : "Plano marcado como revisado. Nenhuma operação foi executada.", "success");
+        showToast(result.executed ? "Plan approved and applied. Undo remains available." : "Plan marked as reviewed. No operation was applied.", "success");
       } else if (result && result.message) {
         showToast(result.message, "error");
       }
@@ -749,7 +749,7 @@
     window.addEventListener("agentcut:changed", function (event) {
       renderAll();
       if (event.detail && event.detail.reason === "save-error") {
-        setStatus("error", "Erro");
+        setStatus("error", "Error");
       }
     });
     window.addEventListener("agentcut:toast", function (event) {
@@ -766,7 +766,7 @@
   }
 
   function initialize() {
-    currentState = AC.project.restore() || AC.project.createInitialState("Projeto sem título");
+    currentState = AC.project.restore() || AC.project.createInitialState("Untitled project");
     bindGlobalEvents();
     bindMediaEvents();
     bindPlayerEvents();
@@ -774,8 +774,8 @@
     bindKeyboardEvents();
     renderAll();
     if (currentState.project.restored) {
-      showToast("Projeto restaurado. Reimporte os arquivos locais para visualizar a mídia.", "success");
-      announce("Projeto restaurado do armazenamento local");
+      showToast("Project restored. Reimport local files to preview media.", "success");
+      announce("Project restored from local storage");
     }
     window.addEventListener("beforeunload", function () {
       AC.project.revokeMediaUrls(currentState);

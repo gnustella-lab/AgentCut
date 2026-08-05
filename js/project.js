@@ -33,7 +33,7 @@
       {
         id: "video-track-1",
         type: "video",
-        name: "Vídeo 1",
+        name: "Video 1",
         locked: false,
         hidden: false,
         muted: false,
@@ -42,7 +42,7 @@
       {
         id: "audio-track-1",
         type: "audio",
-        name: "Áudio 1",
+        name: "Audio 1",
         locked: false,
         hidden: false,
         muted: false,
@@ -51,7 +51,7 @@
       {
         id: "text-track-1",
         type: "text",
-        name: "Texto 1",
+        name: "Text 1",
         locked: false,
         hidden: false,
         muted: false,
@@ -65,7 +65,7 @@
     return {
       project: {
         id: createId("project"),
-        name: name || "Projeto sem título",
+        name: name || "Untitled project",
         createdAt: timestamp,
         updatedAt: timestamp,
         lastSavedAt: null,
@@ -94,7 +94,7 @@
           {
             id: createId("message"),
             role: "assistant",
-            text: "Olá. Eu sou o runtime local do AgentCut. Posso propor um plano e executar apenas operações seguras depois da sua aprovação.",
+            text: "Hi. I am the local AgentCut runtime. I can propose a plan and execute only safe operations after your approval.",
             timestamp: timestamp
           }
         ],
@@ -129,7 +129,7 @@
       id: createId("log"),
       operationId: command.id || createId("operation"),
       type: log.type || "project.change",
-      label: log.label || "Alteração no projeto",
+      label: log.label || "Project change",
       details: log.details || "",
       action: action || "apply",
       timestamp: now()
@@ -138,7 +138,7 @@
 
   function commitCommand(state, command) {
     if (!command || typeof command.undo !== "function" || typeof command.redo !== "function") {
-      throw new Error("Comando de histórico inválido.");
+      throw new Error("Invalid history command.");
     }
     command.id = command.id || createId("operation");
     state.history.undoStack.push(command);
@@ -280,7 +280,7 @@
             id: item.id || createId("clip"),
             mediaId: item.mediaId || null,
             type: item.type || track.type || "video",
-            name: item.name || "Clip sem nome",
+            name: item.name || "Unnamed clip",
             start: Math.max(0, Number(item.start) || 0),
             duration: Math.max(0.1, Number(item.duration) || 5),
             estimatedDuration: Boolean(item.estimatedDuration)
@@ -301,7 +301,7 @@
         return null;
       }
       var saved = JSON.parse(raw);
-      var state = createInitialState(saved.project && saved.project.name ? saved.project.name : "Projeto sem título");
+      var state = createInitialState(saved.project && saved.project.name ? saved.project.name : "Untitled project");
       state.project = Object.assign(state.project, {
         id: saved.project && saved.project.id ? saved.project.id : state.project.id,
         name: saved.project && saved.project.name ? saved.project.name : state.project.name,
@@ -340,13 +340,13 @@
   }
 
   function safeFilename(name) {
-    var base = String(name || "projeto-sem-titulo")
+    var base = String(name || "untitled-project")
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-zA-Z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
       .toLowerCase();
-    return (base || "projeto-sem-titulo") + ".agentcut.json";
+    return (base || "untitled-project") + ".agentcut.json";
   }
 
   function exportProject(state) {

@@ -178,8 +178,8 @@
     visibilityButton.type = "button";
     visibilityButton.dataset.trackAction = track.type === "audio" ? "mute" : "hide";
     visibilityButton.dataset.trackId = track.id;
-    visibilityButton.setAttribute("aria-label", track.type === "audio" ? (track.muted ? "Ativar áudio" : "Silenciar áudio") : (track.hidden ? "Mostrar track" : "Ocultar track"));
-    visibilityButton.title = track.type === "audio" ? (track.muted ? "Ativar áudio" : "Silenciar áudio") : (track.hidden ? "Mostrar track" : "Ocultar track");
+    visibilityButton.setAttribute("aria-label", track.type === "audio" ? (track.muted ? "Unmute audio" : "Mute audio") : (track.hidden ? "Show track" : "Hide track"));
+    visibilityButton.title = track.type === "audio" ? (track.muted ? "Unmute audio" : "Mute audio") : (track.hidden ? "Show track" : "Hide track");
     visibilityButton.innerHTML = '<svg aria-hidden="true"><use href="#icon-' + ((track.hidden || track.muted) ? "eye-off" : "eye") + '"></use></svg>';
     controls.appendChild(lockButton);
     controls.appendChild(visibilityButton);
@@ -199,7 +199,7 @@
     clip.dataset.trackId = track.id;
     clip.setAttribute("role", "button");
     clip.setAttribute("tabindex", "0");
-    clip.setAttribute("aria-label", item.name + ", início " + formatSeconds(item.start) + ", duração " + formatSeconds(item.duration));
+    clip.setAttribute("aria-label", item.name + ", start " + formatSeconds(item.start) + ", duration " + formatSeconds(item.duration));
     clip.style.left = (item.start * PIXELS_PER_SECOND * currentState.timeline.zoom) + "px";
     clip.style.width = Math.max(82, item.duration * PIXELS_PER_SECOND * currentState.timeline.zoom) + "px";
 
@@ -293,7 +293,7 @@
         AC.project.commitCommand(currentState, {
           log: {
             type: "timeline.track.update",
-            label: (action === "lock" ? "Alterar bloqueio" : action === "mute" ? "Alterar áudio" : "Alterar visibilidade"),
+            label: (action === "lock" ? "Update lock" : action === "mute" ? "Update audio" : "Update visibility"),
             details: track.name
           },
           undo: function () { Object.assign(track, previous); },
@@ -341,7 +341,7 @@
     var type = trackTypeForMedia(media);
     var track = currentState.timeline.tracks.find(function (item) { return item.type === type && !item.locked; });
     if (!track) {
-      window.dispatchEvent(new CustomEvent("agentcut:toast", { detail: { message: "Não existe uma track desbloqueada para este tipo de mídia.", tone: "error" } }));
+      window.dispatchEvent(new CustomEvent("agentcut:toast", { detail: { message: "No unlocked track exists for this media type.", tone: "error" } }));
       return false;
     }
     var duration = Number(media.duration) > 0 ? Number(media.duration) : 5;
@@ -361,7 +361,7 @@
     AC.project.commitCommand(currentState, {
       log: {
         type: "timeline.clip.add",
-        label: "Adicionar clipe",
+        label: "Add clip",
         details: media.name
       },
       undo: function () {
@@ -378,7 +378,7 @@
         recalculateDuration(currentState);
       }
     });
-    emit("agentcut:toast", { message: "Clipe adicionado à " + track.name + ".", tone: "success" });
+    emit("agentcut:toast", { message: "Clip added to " + track.name + ".", tone: "success" });
     return true;
   }
 
@@ -390,7 +390,7 @@
     var item = location.item;
     var index = location.index;
     if (track.locked) {
-      if (!options.silent) emit("agentcut:toast", { message: "Desbloqueie a track antes de remover este clipe.", tone: "error" });
+      if (!options.silent) emit("agentcut:toast", { message: "Unlock the track before removing this clip.", tone: "error" });
       return false;
     }
     track.items.splice(index, 1);
@@ -399,7 +399,7 @@
     AC.project.commitCommand(currentState, {
       log: {
         type: options.logType || "timeline.clip.remove",
-        label: options.logLabel || "Remover clipe",
+        label: options.logLabel || "Remove clip",
         details: options.logDetails || item.name
       },
       undo: function () {
@@ -414,21 +414,21 @@
         recalculateDuration(currentState);
       }
     });
-    if (!options.silent) emit("agentcut:toast", { message: "Clipe removido da timeline.", tone: "success" });
+    if (!options.silent) emit("agentcut:toast", { message: "Clip removed from the timeline.", tone: "success" });
     return true;
   }
 
   function splitSelected(currentState, options) {
     options = options || {};
     var location = itemLocation(currentState, currentState.timeline.selectedItemId);
-    if (!location) return { ok: false, message: "Selecione um clipe antes de dividir." };
-    if (location.track.locked) return { ok: false, message: "Desbloqueie a track antes de dividir este clipe." };
-    if (location.item.estimatedDuration) return { ok: false, message: "Aguarde o carregamento da duração real antes de dividir." };
+    if (!location) return { ok: false, message: "Select a clip before splitting." };
+    if (location.track.locked) return { ok: false, message: "Unlock the track before splitting this clip." };
+    if (location.item.estimatedDuration) return { ok: false, message: "Wait for the real duration to load before splitting." };
     var start = Number(location.item.start) || 0;
     var end = start + (Number(location.item.duration) || 0);
     var playhead = Number(currentState.timeline.playhead) || 0;
     if (playhead <= start + 0.05 || playhead >= end - 0.05) {
-      return { ok: false, message: "Mova o playhead para dentro do clipe para dividi-lo." };
+      return { ok: false, message: "Move the playhead inside the clip to split it." };
     }
     var track = location.track;
     var beforeItems = track.items.slice();
@@ -446,8 +446,8 @@
     AC.project.commitCommand(currentState, {
       log: {
         type: options.logType || "timeline.clip.split",
-        label: options.logLabel || "Dividir clipe",
-        details: options.logDetails || location.item.name + " em " + formatSeconds(playhead)
+        label: options.logLabel || "Split clip",
+        details: options.logDetails || location.item.name + " at " + formatSeconds(playhead)
       },
       undo: function () {
         track.items.splice(0, track.items.length);
@@ -462,7 +462,7 @@
         recalculateDuration(currentState);
       }
     });
-    if (!options.silent) emit("agentcut:toast", { message: "Clipe dividido no playhead.", tone: "success" });
+    if (!options.silent) emit("agentcut:toast", { message: "Clip split at the playhead.", tone: "success" });
     return { ok: true, firstId: left.id, secondId: right.id };
   }
 
@@ -481,42 +481,42 @@
     AC.project.commitCommand(currentState, {
       log: {
         type: options.logType || "timeline.sequence.update",
-        label: options.logLabel || "Atualizar sequência",
+        label: options.logLabel || "Update sequence",
         details: options.logDetails || next.width + " × " + next.height
       },
       undo: function () { currentState.timeline.sequence = Object.assign({}, previous); },
       redo: function () { currentState.timeline.sequence = Object.assign({}, next); }
     });
-    if (!options.silent) emit("agentcut:toast", { message: "Configuração da sequência atualizada.", tone: "success" });
+    if (!options.silent) emit("agentcut:toast", { message: "Sequence settings updated.", tone: "success" });
     return { ok: true, changed: true, sequence: next };
   }
 
   function applyAgentOperation(currentState, operation) {
-    if (!operation || !operation.type) return { ok: false, message: "Este plano não possui uma operação executável." };
+    if (!operation || !operation.type) return { ok: false, message: "This plan has no executable operation." };
     if ((operation.type === "timeline.remove-selected" || operation.type === "timeline.split-selected") && Object.prototype.hasOwnProperty.call(operation, "targetItemId")) {
       if (!operation.targetItemId || currentState.timeline.selectedItemId !== operation.targetItemId) {
-        return { ok: false, message: "A seleção mudou desde a criação do plano. Revise o clipe antes de aprovar." };
+        return { ok: false, message: "The selection changed since the plan was created. Review the clip before approving." };
       }
     }
     if (operation.type === "timeline.remove-selected") {
-      var removed = removeSelected(currentState, { silent: true, logType: "agent.operation.remove", logLabel: "Agente removeu clipe" });
-      return removed ? { ok: true, changed: true, message: "Clipe selecionado removido." } : { ok: false, message: "Não foi possível remover o clipe selecionado." };
+      var removed = removeSelected(currentState, { silent: true, logType: "agent.operation.remove", logLabel: "Agent removed clip" });
+      return removed ? { ok: true, changed: true, message: "Selected clip removed." } : { ok: false, message: "Could not remove the selected clip." };
     }
     if (operation.type === "timeline.split-selected") {
-      var split = splitSelected(currentState, { silent: true, logType: "agent.operation.split", logLabel: "Agente dividiu clipe" });
-      return split.ok ? { ok: true, changed: true, message: "Clipe dividido no playhead." } : split;
+      var split = splitSelected(currentState, { silent: true, logType: "agent.operation.split", logLabel: "Agent split clip" });
+      return split.ok ? { ok: true, changed: true, message: "Clip split at the playhead." } : split;
     }
     if (operation.type === "sequence.set") {
-      var sequence = setSequence(currentState, operation.values, { silent: true, logType: "agent.operation.sequence", logLabel: "Agente atualizou sequência", logDetails: "9:16 · 1080 × 1920" });
-      return { ok: true, changed: sequence.changed, message: sequence.changed ? "Sequência configurada para 9:16." : "A sequência já estava configurada para 9:16." };
+      var sequence = setSequence(currentState, operation.values, { silent: true, logType: "agent.operation.sequence", logLabel: "Agent updated sequence", logDetails: "9:16 · 1080 × 1920" });
+      return { ok: true, changed: sequence.changed, message: sequence.changed ? "Sequence set to 9:16." : "The sequence was already set to 9:16." };
     }
-    return { ok: false, message: "Operação do agente não reconhecida." };
+    return { ok: false, message: "Unrecognized agent operation." };
   }
 
   function addTrack(currentState, type) {
     var normalized = type === "audio" || type === "text" ? type : "video";
     var count = currentState.timeline.tracks.filter(function (track) { return track.type === normalized; }).length + 1;
-    var label = normalized === "audio" ? "Áudio " : normalized === "text" ? "Texto " : "Vídeo ";
+    var label = normalized === "audio" ? "Audio " : normalized === "text" ? "Text " : "Video ";
     var track = {
       id: AC.project.createId(normalized + "-track"),
       type: normalized,
@@ -531,7 +531,7 @@
     AC.project.commitCommand(currentState, {
       log: {
         type: "timeline.track.add",
-        label: "Adicionar track",
+        label: "Add track",
         details: track.name
       },
       undo: function () {

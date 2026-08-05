@@ -1,80 +1,80 @@
-# AgentCut, baseline arquitetural
+# AgentCut, architectural baseline
 
-Status: baseline arquitetural da versão completa. O repositório também contém um MVP local funcional, sem backend, para validar o fluxo agente → plano → aprovação → operação.
+Status: architectural baseline for the full version. The repository also contains a functional local MVP, without a backend, for validating the agent → plan → approval → operation flow.
 
-## Propósito
+## Purpose
 
-AgentCut será um editor de vídeo não destrutivo no qual humanos e agentes usam o mesmo estado de projeto. A fonte de verdade será uma representação determinística da timeline, acompanhada por operações atômicas, versões, precondições, inversas e auditoria. A interface visual, o SDK e agentes externos serão clientes desse núcleo, não implementações paralelas da lógica de edição.
+AgentCut will be a non-destructive video editor in which humans and agents use the same project state. The source of truth will be a deterministic timeline representation accompanied by atomic operations, versions, preconditions, inverses, and auditing. The visual interface, SDK, and external agents will be clients of this core, not parallel implementations of editing logic.
 
 ## Assumptions
 
-- O primeiro produto é uma aplicação web desktop-first, com API separada e workers locais ou distribuídos.
-- O MVP prioriza uma experiência local reproduzível. Colaboração, publicação e render distribuído ficam para fases posteriores.
-- Arquivos originais são imutáveis e armazenados por conteúdo, usando SHA-256.
-- O sistema suporta modelos locais e hospedados por adaptadores. Nenhum fornecedor de IA é requisito do domínio.
-- Determinismo significa plano de render idêntico sempre. Exportação byte a byte será garantida no perfil CPU reprodutível, com toolchain fixada. Aceleração por hardware será marcada como não bit-exata.
+- The first product is a desktop-first web application, with a separate API and local or distributed workers.
+- The MVP prioritizes a reproducible local experience. Collaboration, publishing, and distributed rendering are deferred to later phases.
+- Original files are immutable and content-addressed with SHA-256.
+- The system supports local and hosted models through adapters. No AI provider is a domain requirement.
+- Determinism means the same render plan every time. Byte-for-byte export will be guaranteed in a reproducible CPU profile with a pinned toolchain. Hardware acceleration will be marked as non-bit-exact.
 
-## Arquitetura
+## Architecture
 
-A primeira versão usa um monólito modular, não uma frota de microsserviços. API, domínio e runtime ficam separados por módulos e contratos. Workers executam tarefas pesadas por filas. Quando houver necessidade operacional, cada módulo poderá ser extraído sem alterar os contratos públicos.
+The first version uses a modular monolith, not a fleet of microservices. The API, domain, and runtime are separated by modules and contracts. Workers execute heavy tasks through queues. When operational needs arise, each module can be extracted without changing public contracts.
 
-Camadas:
+Layers:
 
-1. `apps/web`: UI React, player, biblioteca, timeline, transcript e painel do agente.
-2. `apps/api`: autenticação, REST, WebSocket, políticas, domínio de projeto e operações.
-3. `apps/worker`: jobs de mídia, análise, render e controle de qualidade.
-4. `packages/timeline-engine`: modelo temporal e invariantes.
-5. `packages/operation-engine`: validação, aplicação, inversão, dry run e conflitos.
-6. `packages/agent-runtime`: contexto, planejamento, catálogo, política, execução, aprovação e revisão.
-7. `packages/media-pipeline`: abstração tipada de `ffprobe`, FFmpeg, codecs e filtros.
-8. `packages/render-engine`: compilador da timeline para Render IR e pipeline executável.
-9. `packages/contracts`: schemas JSON, eventos, erros e contratos OpenAPI.
-10. `packages/sdk`: cliente TypeScript para aplicações e agentes externos.
+1. `apps/web`: React UI, player, library, timeline, transcript, and agent panel.
+2. `apps/api`: authentication, REST, WebSocket, policies, project domain, and operations.
+3. `apps/worker`: media, analysis, render, and quality-control jobs.
+4. `packages/timeline-engine`: time model and invariants.
+5. `packages/operation-engine`: validation, application, inversion, dry runs, and conflicts.
+6. `packages/agent-runtime`: context, planning, catalog, policy, execution, approval, and review.
+7. `packages/media-pipeline`: typed abstraction over `ffprobe`, FFmpeg, codecs, and filters.
+8. `packages/render-engine`: compiler from the timeline to Render IR and an executable pipeline.
+9. `packages/contracts`: JSON schemas, events, errors, and OpenAPI contracts.
+10. `packages/sdk`: TypeScript client for applications and external agents.
 
-Infraestrutura local: PostgreSQL, Redis, MinIO e FFmpeg. PostgreSQL guarda o estado materializado, o log de operações, análises e auditoria. Redis e BullMQ orquestram jobs. MinIO fornece uma API S3 local para originais, proxies e exports.
+Local infrastructure: PostgreSQL, Redis, MinIO, and FFmpeg. PostgreSQL stores materialized state, the operation log, analyses, and audit data. Redis and BullMQ orchestrate jobs. MinIO provides a local S3 API for originals, proxies, and exports.
 
 ## Timeline
 
-O tempo é racional, não um `number` de JavaScript. A forma JSON é:
+Time is rational, not a JavaScript `number`. The JSON form is:
 
     { "value": "24000", "timescale": "1001" }
 
-A biblioteca de tempo normaliza frações, compara valores sem ponto flutuante e converte para frames ou samples com arredondamento explícito. Cada clip possui `timeline_range` e `source_range`; a duração é derivada e validada. Tracks, efeitos, keyframes, máscaras, links de áudio e tags semânticas ficam no estado da sequência.
+The time library normalizes fractions, compares values without floating point, and converts to frames or samples with explicit rounding. Each clip has a `timeline_range` and a `source_range`; duration is derived and validated. Tracks, effects, keyframes, masks, audio links, and semantic tags live in sequence state.
 
-A persistência usa log de operações mais projeção materializada. Cada operação informa ator, parâmetros, precondições, estado anterior, estado posterior, motivo, confiança, versão da ferramenta, idempotency key e operação inversa. Snapshots reduzem o custo de reconstrução. O domínio não depende da UI.
+Persistence uses an operation log plus a materialized projection. Each operation records the actor, parameters, preconditions, previous state, next state, reason, confidence, tool version, idempotency key, and inverse operation. Snapshots reduce reconstruction cost. The domain does not depend on the UI.
 
-## Runtime de agentes
+## Agent runtime
 
-O ciclo é: compreender, inspecionar, planejar, simular, pedir aprovação conforme a política, executar, validar, revisar e apresentar. O modelo nunca escreve diretamente no banco. Ele produz chamadas de ferramentas tipadas. Toda ferramenta mutável gera operações atômicas por meio do `OperationEngine`.
+The cycle is: understand, inspect, plan, simulate, request approval according to policy, execute, validate, review, and present. The model never writes directly to the database. It produces typed tool calls. Every mutable tool creates atomic operations through the `OperationEngine`.
 
-O runtime possui adaptadores para planner, transcrição, visão, embeddings, áudio e geração. O MVP inclui um planner determinístico para testes e um adaptador compatível com APIs de chat estruturadas. Texto de transcript, OCR e descrições de mídia é evidência não confiável, nunca instrução de sistema.
+The runtime has adapters for planning, transcription, vision, embeddings, audio, and generation. The MVP includes a deterministic planner for testing and an adapter compatible with structured chat APIs. Transcript text, OCR, and media descriptions are untrusted evidence, never system instructions.
 
-## Renderização
+## Rendering
 
-A timeline é compilada para um `RenderPlan` versionado. O plano resolve assets por hash, normaliza timebases, monta trilhas de vídeo e áudio, aplica efeitos, compõe legendas e define codecs. O `MediaPipeline` cria listas de argumentos, nunca concatena strings para shell. `ffprobe` valida entradas e saídas.
+The timeline is compiled into a versioned `RenderPlan`. The plan resolves assets by hash, normalizes timebases, assembles video and audio tracks, applies effects, composes captions, and defines codecs. `MediaPipeline` creates argument lists and never concatenates shell strings. `ffprobe` validates inputs and outputs.
 
-O cache usa o hash de asset, snapshot, Render IR, preset e toolchain. O manifesto registra hashes, parâmetros, logs, custos e artefatos. O perfil reprodutível usa CPU, metadados fixos e parâmetros de codec explicitamente definidos.
+The cache uses the asset hash, snapshot, Render IR, preset, and toolchain. The manifest records hashes, parameters, logs, costs, and artifacts. The reproducible profile uses CPU, fixed metadata, and explicitly defined codec parameters.
 
-## Segurança
+## Security
 
-Todo acesso é limitado por workspace e projeto. Uploads passam por limite de tamanho, MIME real, `ffprobe`, nome seguro, diretório temporário e armazenamento por hash. Workers executam em sandbox com diretório de trabalho isolado, sem shell, com limites de CPU, memória, processos e rede.
+All access is limited by workspace and project. Uploads pass size limits, real MIME checks, `ffprobe`, safe naming, a temporary directory, and hash-based storage. Workers run in a sandbox with an isolated working directory, without a shell, and with CPU, memory, process, and network limits.
 
-Agentes recebem permissões e orçamento próprios. A política pode bloquear exclusão, envio externo, publicação, resolução, número de operações, custo e render. A operação é negada antes de tocar no estado quando faltar aprovação. URLs de mídia são assinadas e expiram.
+Agents receive their own permissions and budgets. Policy can block deletion, external sending, publishing, resolution changes, operation counts, cost, and rendering. An operation is denied before touching state when approval is missing. Media URLs are signed and expire.
 
 ## MVP
 
-O MVP entrega criação de projeto, importação de vídeo e áudio, probe, proxy, thumbnails, waveform, timeline multipista básica, player, corte, movimento, split, trim, delete, undo, transcrição por adaptador, edição via transcript, remoção de silêncios, legendas, reenquadramento vertical, normalização, plano de agente, dry run, aprovação, execução, auditoria, validação, preview, MP4 1080x1920 e SRT/VTT.
+The MVP delivers project creation, video and audio import, probing, proxies, thumbnails, waveform, a basic multitrack timeline, a player, cut, move, split, trim, delete, undo, adapter-based transcription, transcript editing, silence removal, captions, vertical reframing, normalization, agent plans, dry runs, approval, execution, auditing, validation, preview, MP4 1080x1920, and SRT/VTT.
 
-Ficam fora do MVP: colaboração em tempo real, branches e merge completos, tracking avançado, remoção de fundo, marketplace de modelos, publicação, render distribuído, todos os scopes profissionais e bit-exact em GPU.
+The following remain outside the MVP: real-time collaboration, full branches and merges, advanced tracking, background removal, a model marketplace, publishing, distributed rendering, all professional scopes, and GPU bit-exactness.
 
-## Decisões de integração
+## Integration decisions
 
-- FFmpeg e `ffprobe` ficam atrás de `MediaPipeline`, por causa da amplitude de filtros e da necessidade de testar os argumentos gerados.
-- BullMQ é usado para o MVP por oferecer filas Redis, retries, prioridades, concorrência, progresso e recuperação de workers. O banco continua sendo a fonte de verdade e a idempotência é garantida pelo domínio. Temporal é uma opção futura para workflows de longa duração com muitas pausas humanas.
-- OpenTimelineIO será um adaptador de intercâmbio, não o modelo canônico, pois o domínio de AgentCut precisa incluir operações, aprovação, permissões, custos e auditoria.
-- WebCodecs será usado de forma oportunista no preview dentro de Dedicated Workers, com fallback para vídeo HTML e proxies. Exportação continua no worker.
-- OpenTelemetry instrumentará API e workers. Instrumentação crítica não dependerá do status experimental do browser.
+- FFmpeg and `ffprobe` sit behind `MediaPipeline` because of the breadth of filters and the need to test generated arguments.
+- BullMQ is used for the MVP because it provides Redis queues, retries, priorities, concurrency, progress, and worker recovery. The database remains the source of truth and idempotency is guaranteed by the domain. Temporal is a future option for long-running workflows with many human pauses.
+- OpenTimelineIO will be an interchange adapter, not the canonical model, because the AgentCut domain must include operations, approval, permissions, costs, and auditing.
+- WebCodecs will be used opportunistically for preview inside Dedicated Workers, with HTML video and proxy fallback. Export remains in a worker.
+- OpenTelemetry will instrument the API and workers. Critical instrumentation will not depend on the browser's experimental status.
 
-## Critérios de desenho
+## Design criteria
 
-Uma alteração somente é concluída quando sua operação foi validada, persistida com precondições, registrada no audit log, tornada reversível quando aplicável e incluída em uma projeção de estado consistente. Falhas de jobs não podem alterar parcialmente a timeline.
+A change is complete only when its operation has been validated, persisted with preconditions, recorded in the audit log, made reversible when applicable, and included in a consistent state projection. Job failures must not partially change the timeline.

@@ -1,9 +1,9 @@
 sequenceDiagram
-    actor Human as Humano
-    participant UI as UI ou SDK
+    actor Human as Human
+    participant UI as UI or SDK
     participant API as API
     participant RT as Agent Editing Runtime
-    participant IDX as Contexto e índice multimodal
+    participant IDX as Multimodal context and index
     participant POL as Policy Engine
     participant OP as Operation Engine
     participant Q as BullMQ
@@ -11,26 +11,26 @@ sequenceDiagram
     participant QC as Quality Control
     participant DB as PostgreSQL
 
-    Human->>UI: Instrução em linguagem natural
-    UI->>API: Criar AgentSession
-    API->>RT: compreender(instrução, restrições)
-    RT->>IDX: inspecionar projeto, mídia e transcript
-    IDX-->>RT: evidências com tempo, modelo e confiança
-    RT->>RT: gerar plano estruturado
-    RT->>OP: simular operações atômicas
-    OP-->>RT: diff, duração, alertas e custo
-    RT->>POL: verificar permissões, orçamento e aprovação
-    POL-->>UI: Plano aguardando aprovação
-    Human->>UI: Aprovar ou rejeitar
-    UI->>API: aprovação do plano
-    API->>RT: executar plano
-    RT->>OP: aplicar operação com precondições
-    OP->>DB: transação, log e projeção
-    OP-->>RT: resultado e operação inversa
-    RT->>Q: jobs de análise/render/QC
-    Q->>W: executar job idempotente
-    W-->>DB: progresso, logs, artefacts e métricas
-    W->>QC: validar output
-    QC-->>RT: relatório de qualidade
-    RT-->>UI: mudanças, motivos, confiança e alertas
-    UI-->>Human: resultado, timeline, undo e export
+    Human->>UI: Natural-language instruction
+    UI->>API: Create AgentSession
+    API->>RT: understand(instruction, constraints)
+    RT->>IDX: inspect project, media, and transcript
+    IDX-->>RT: evidence with time, model, and confidence
+    RT->>RT: generate structured plan
+    RT->>OP: simulate atomic operations
+    OP-->>RT: diff, duration, alerts, and cost
+    RT->>POL: check permissions, budget, and approval
+    POL-->>UI: Plan awaiting approval
+    Human->>UI: Approve or reject
+    UI->>API: Plan approval
+    API->>RT: execute plan
+    RT->>OP: apply operation with preconditions
+    OP->>DB: transaction, log, and projection
+    OP-->>RT: result and inverse operation
+    RT->>Q: analysis/render/QC jobs
+    Q->>W: execute idempotent job
+    W-->>DB: progress, logs, artifacts, and metrics
+    W->>QC: validate output
+    QC-->>RT: quality report
+    RT-->>UI: changes, reasons, confidence, and alerts
+    UI-->>Human: result, timeline, undo, and export

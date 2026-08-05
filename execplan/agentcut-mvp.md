@@ -1,87 +1,87 @@
-# Construir o vertical slice do MVP do AgentCut
+# Build the AgentCut MVP vertical slice
 
-Este é um plano vivo. As seções `Progress`, `Surprises & Discoveries`, `Decision Log` e `Outcomes & Retrospective` devem ser atualizadas durante a execução.
+This is a living plan. The `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` sections should be updated during execution.
 
 ## Purpose / Big Picture
 
-Depois deste plano, um desenvolvedor poderá iniciar o AgentCut localmente, criar um projeto, importar uma mídia, gerar metadados e proxy, criar uma sequência e aplicar operações determinísticas de timeline por API. O comportamento demonstrável será uma base real para o editor orientado a agentes, não um mock visual: o arquivo original permanecerá intacto, a operação terá log e undo, a repetição com a mesma idempotency key não duplicará o efeito e um conflito de versão retornará erro estruturado.
+After this plan, a developer will be able to start AgentCut locally, create a project, import media, generate metadata and a proxy, create a sequence, and apply deterministic timeline operations through an API. The demonstrable behavior will be a real foundation for an agent-oriented editor, not a visual mock: the original file will remain intact, the operation will be logged and undoable, repeating the same idempotency key will not duplicate the effect, and a version conflict will return a structured error.
 
-A primeira entrega não tentará implementar todos os recursos profissionais. Ela estabelecerá os contratos que permitem adicionar transcript, áudio, render e runtime de agentes sem acoplar essas capacidades à UI.
+The first delivery will not attempt to implement every professional feature. It will establish the contracts needed to add transcripts, audio, rendering, and an agent runtime without coupling those capabilities to the UI.
 
 ## Progress
 
-- [x] (2026-08-04) Requisitos analisados e MVP delimitado.
-- [x] (2026-08-04) Stack, limites arquiteturais e critérios de determinismo definidos.
-- [x] (2026-08-04) Diagramas iniciais criados em `docs/architecture/components.mmd` e `docs/architecture/agent-flow.mmd`.
-- [ ] Monorepo e ambiente Docker local criados.
-- [ ] Schemas de tempo, projeto, sequência e operação implementados.
-- [ ] Persistência, idempotência e optimistic concurrency implementadas.
-- [ ] Pipeline de probe, proxy, thumbnail e waveform exercitado.
-- [ ] UI inicial conectada à API.
-- [ ] Vertical slice de agente, render e export implementado.
-- [ ] Testes unitários, integração e E2E executados.
+- [x] (2026-08-04) Requirements analyzed and MVP scoped.
+- [x] (2026-08-04) Stack, architectural boundaries, and determinism criteria defined.
+- [x] (2026-08-04) Initial diagrams created in `docs/architecture/components.mmd` and `docs/architecture/agent-flow.mmd`.
+- [ ] Monorepo and local Docker environment created.
+- [ ] Time, project, sequence, and operation schemas implemented.
+- [ ] Persistence, idempotency, and optimistic concurrency implemented.
+- [ ] Probe, proxy, thumbnail, and waveform pipeline exercised.
+- [ ] Initial UI connected to the API.
+- [ ] Agent, render, and export vertical slice implemented.
+- [ ] Unit, integration, and E2E tests executed.
 
 ## Surprises & Discoveries
 
-- Observação: a busca automática deste ambiente não pôde usar `ddgs`, pois o pacote não está instalado.
-  Evidência: `web_search` retornou `ddgs package is not installed`; as decisões foram conferidas em documentações oficiais acessíveis diretamente.
-- Observação: BullMQ oferece retries, prioridades, concorrência e recuperação, mas sua semântica prática é pelo menos uma entrega em caso extremo.
-  Consequência: jobs devem ser idempotentes e a fonte de verdade deve permanecer no PostgreSQL.
-- Observação: WebCodecs permite processamento de frames em Dedicated Workers, porém não deve ser requisito único de preview.
-  Consequência: o player terá fallback por proxy e elemento de vídeo.
-- Observação: determinismo byte a byte não deve ser prometido para qualquer encoder de hardware.
-  Consequência: o produto separará o perfil CPU reprodutível do perfil acelerado.
+- Observation: automatic search in this environment could not use `ddgs` because the package is not installed.
+  Evidence: `web_search` returned `ddgs package is not installed`; decisions were checked against official documentation accessed directly.
+- Observation: BullMQ provides retries, priorities, concurrency, and recovery, but its practical semantics are at-least-once delivery in the extreme case.
+  Consequence: jobs must be idempotent and PostgreSQL must remain the source of truth.
+- Observation: WebCodecs enables frame processing in Dedicated Workers, but it should not be the only preview requirement.
+  Consequence: the player will have a proxy and HTML video fallback.
+- Observation: byte-for-byte determinism should not be promised for every hardware encoder.
+  Consequence: the product will separate a reproducible CPU profile from an accelerated profile.
 
 ## Decision Log
 
-- Decision: usar monólito modular na primeira versão.
-  Rationale: mantém o ciclo de desenvolvimento curto e permite extrair workers e serviços quando a carga justificar, sem distribuir o domínio antes de existirem contratos estáveis.
+- Decision: use a modular monolith for the first version.
+  Rationale: it keeps the development cycle short and allows workers and services to be extracted when load justifies it, without distributing the domain before stable contracts exist.
   Date/Author: 2026-08-04, Deep.
-- Decision: usar TypeScript estrito no frontend, API, domínio e SDK.
-  Rationale: timeline, schemas JSON, ferramentas e SDK compartilham tipos e validação em runtime.
+- Decision: use strict TypeScript in the frontend, API, domain, and SDK.
+  Rationale: the timeline, JSON schemas, tools, and SDK share types and runtime validation.
   Date/Author: 2026-08-04, Deep.
-- Decision: usar PostgreSQL, Redis/BullMQ, MinIO, FFmpeg e `ffprobe`.
-  Rationale: composição local simples, persistência transacional, filas, storage S3 compatível e primitives maduras de mídia.
+- Decision: use PostgreSQL, Redis/BullMQ, MinIO, FFmpeg, and `ffprobe`.
+  Rationale: simple local composition, transactional persistence, queues, S3-compatible storage, and mature media primitives.
   Date/Author: 2026-08-04, Deep.
-- Decision: representar tempo como fração racional serializada com strings.
-  Rationale: evita drift de ponto flutuante em frame rates como 30000/1001 e torna arredondamento explícito.
+- Decision: represent time as a serialized rational fraction using strings.
+  Rationale: it avoids floating-point drift at frame rates such as 30000/1001 and makes rounding explicit.
   Date/Author: 2026-08-04, Deep.
-- Decision: usar log de operações mais projeção materializada, em vez de event sourcing puro.
-  Rationale: preserva auditoria e undo sem tornar leitura da timeline cara ou difícil para a UI.
+- Decision: use an operation log plus materialized projection instead of pure event sourcing.
+  Rationale: it preserves auditing and undo without making timeline reads expensive or difficult for the UI.
   Date/Author: 2026-08-04, Deep.
-- Decision: tratar OpenTimelineIO como intercâmbio futuro, não como modelo canônico.
-  Rationale: o modelo interno precisa de aprovação, permissões, custos, confiança, inversas e auditoria.
+- Decision: treat OpenTimelineIO as future interchange, not the canonical model.
+  Rationale: the internal model needs approval, permissions, costs, confidence, inverses, and auditing.
   Date/Author: 2026-08-04, Deep.
 
 ## Outcomes & Retrospective
 
-Ainda não há implementação da arquitetura completa descrita neste plano. A entrega mínima atual está em `index.html`, `css/` e `js/`: ela cobre preview local, timeline não destrutiva, planos determinísticos, aprovação, operações seguras, undo/redo, persistência de metadados e manifesto exportável. Backend, workers, FFmpeg integrado e modelos reais permanecem como próximos marcos, não como requisitos do MVP local.
+The complete architecture described in this plan is not implemented yet. The current minimum delivery is in `index.html`, `css/`, and `js/`: it covers local preview, a non-destructive timeline, deterministic plans, approval, safe operations, undo/redo, metadata persistence, and an exportable manifest. The backend, workers, integrated FFmpeg, and real models remain future milestones, not requirements for the local MVP.
 
 ## Context and Orientation
 
-O diretório do projeto começa vazio. Os documentos de arquitetura ficam em `docs/architecture`. A aplicação será organizada em `apps/web`, `apps/api` e `apps/worker`; bibliotecas compartilhadas ficarão em `packages`.
+The project directory starts empty. Architecture documents live in `docs/architecture`. The application will be organized into `apps/web`, `apps/api`, and `apps/worker`; shared libraries will live in `packages`.
 
-A timeline é um estado versionado. Um `TimelineItem` referencia um asset original e contém um intervalo na sequência e um intervalo no asset. Uma operação é uma transição pequena e reversível entre duas versões. Uma precondição é uma afirmação que precisa continuar verdadeira, como a versão esperada de um clip. Uma idempotency key identifica uma intenção que só pode produzir um efeito uma vez no escopo definido.
+The timeline is versioned state. A `TimelineItem` references an original asset and contains a range in the sequence and a range in the asset. An operation is a small, reversible transition between two versions. A precondition is an assertion that must remain true, such as the expected version of a clip. An idempotency key identifies an intent that can produce an effect only once within the defined scope.
 
 ## Plan of Work
 
-Primeiro criar `package.json`, workspace, configurações TypeScript, lint, testes e Docker Compose. O Compose deve fornecer PostgreSQL, Redis e MinIO, com volumes nomeados e portas documentadas.
+First create `package.json`, the workspace, TypeScript configuration, linting, tests, and Docker Compose. Compose should provide PostgreSQL, Redis, and MinIO with named volumes and documented ports.
 
-Depois criar `packages/time`, `packages/contracts`, `packages/project-schema`, `packages/operation-schema`, `packages/timeline-engine` e `packages/operation-engine`. O motor de tempo deve fazer soma, comparação, interseção, conversão para frame e serialização sem `number` para a parte temporal. O motor de operações deve validar, simular, aplicar e gerar inversas para inserir, mover, dividir, aparar, remover e desfazer clips.
+Then create `packages/time`, `packages/contracts`, `packages/project-schema`, `packages/operation-schema`, `packages/timeline-engine`, and `packages/operation-engine`. The time engine must perform addition, comparison, intersection, frame conversion, and serialization without using `number` for temporal values. The operation engine must validate, simulate, apply, and generate inverses for inserting, moving, splitting, trimming, removing, and undoing clips.
 
-Em seguida criar a API Fastify com health check, criação e leitura de projetos, criação e leitura de sequência, aplicação de operação e consulta do audit log. A escrita de operação deve usar transação, checar versão, registrar a idempotency key e atualizar a projeção. Uma chamada repetida deve devolver o resultado salvo anteriormente.
+Next create the Fastify API with a health check, project creation and reads, sequence creation and reads, operation application, and audit-log queries. Operation writes must use a transaction, check the version, record the idempotency key, and update the projection. A repeated call must return the previously stored result.
 
-Depois criar `apps/worker` e `packages/media-pipeline`. O pipeline deve executar `ffprobe` e FFmpeg somente com arrays de argumentos, em diretório temporário seguro. O primeiro job deve importar ou registrar asset, calcular SHA-256, extrair metadados e produzir proxy. Waveform e thumbnails podem ser jobs independentes.
+Then create `apps/worker` and `packages/media-pipeline`. The pipeline must run `ffprobe` and FFmpeg only with argument arrays in a safe temporary directory. The first job must import or register an asset, calculate SHA-256, extract metadata, and produce a proxy. Waveforms and thumbnails can be independent jobs.
 
-Por último criar uma UI mínima que lista projetos, mostra assets, abre uma sequência e exibe clips em uma timeline simplificada. Ela deve consumir o mesmo contrato da API e exibir operação, versão, autor, motivo, alerta e botão de undo.
+Finally create a minimal UI that lists projects, shows assets, opens a sequence, and displays clips in a simplified timeline. It must consume the same API contract and display the operation, version, author, reason, alert, and undo button.
 
-O segundo vertical slice, depois da fundação, adicionará transcript, remoção de silêncios, plano de agente, dry run, aprovação, render preview e export 1080x1920.
+The second vertical slice, after the foundation, will add transcripts, silence removal, an agent plan, dry run, approval, preview rendering, and 1080x1920 export.
 
 ## Concrete Steps
 
-Executar todos os comandos a partir de `/home/mello/Área de trabalho/Pasta sem título`.
+Run all commands from `/home/mello/Área de trabalho/Pasta sem título`.
 
-1. Verificar as ferramentas locais sem modificar arquivos do usuário:
+1. Verify local tools without modifying user files:
 
     `node --version`
     `pnpm --version || corepack pnpm --version`
@@ -89,61 +89,61 @@ Executar todos os comandos a partir de `/home/mello/Área de trabalho/Pasta sem 
     `ffmpeg -version`
     `ffprobe -version`
 
-2. Criar o workspace TypeScript e instalar somente dependências necessárias ao primeiro marco. Se `pnpm` não estiver disponível, habilitar o gerenciador por Corepack ou usar npm workspaces como fallback documentado.
+2. Create the TypeScript workspace and install only the dependencies needed for the first milestone. If `pnpm` is unavailable, enable the package manager through Corepack or use npm workspaces as a documented fallback.
 
-3. Iniciar a infraestrutura:
+3. Start the infrastructure:
 
     `docker compose -f infrastructure/docker/compose.yaml up -d`
 
-4. Rodar migrações e testes do domínio:
+4. Run domain migrations and tests:
 
     `pnpm typecheck`
     `pnpm lint`
     `pnpm test --run`
 
-5. Exercitar a API:
+5. Exercise the API:
 
     `curl -fsS http://localhost:3000/health`
     `curl -fsS -X POST http://localhost:3000/v1/projects -H 'content-type: application/json' -d '{"name":"Demo AgentCut"}'`
 
-6. Exercitar o fluxo de operação com uma sequência e um clip. A segunda submissão deve devolver o mesmo `operation_id` ou o resultado persistido. Uma submissão com versão antiga deve responder HTTP 409 com código `TIMELINE_VERSION_CONFLICT`.
+6. Exercise the operation flow with a sequence and a clip. The second submission should return the same `operation_id` or the persisted result. A submission with an old version should return HTTP 409 with code `TIMELINE_VERSION_CONFLICT`.
 
-7. Exercitar mídia com um fixture gerado por FFmpeg. Confirmar por `ffprobe` que o proxy tem o formato esperado e que o SHA-256 do original não mudou.
+7. Exercise media with an FFmpeg-generated fixture. Use `ffprobe` to confirm that the proxy has the expected format and that the original SHA-256 has not changed.
 
 ## Validation and Acceptance
 
-O primeiro marco passa quando:
+The first milestone passes when:
 
-- `GET /health` retorna HTTP 200.
-- Um projeto e uma sequência podem ser criados e lidos.
-- Uma operação de inserção, split, move, trim e delete passa por validação e atualiza a versão.
-- O undo restaura o estado anterior da sequência.
-- A mesma idempotency key não cria um segundo clip nem uma segunda entrada no log efetivo.
-- Um conflito de versão não altera a projeção.
-- Uma falha de validação não cria operação parcial.
-- O asset original mantém o mesmo hash antes e depois do proxy.
-- `pnpm typecheck`, `pnpm lint` e `pnpm test --run` terminam com sucesso.
-- A UI consegue exibir a sequência e o histórico da operação.
+- `GET /health` returns HTTP 200.
+- A project and a sequence can be created and read.
+- Insert, split, move, trim, and delete operations pass validation and update the version.
+- Undo restores the previous sequence state.
+- The same idempotency key does not create a second clip or a second effective log entry.
+- A version conflict does not change the projection.
+- A validation failure does not create a partial operation.
+- The original asset keeps the same hash before and after proxy creation.
+- `pnpm typecheck`, `pnpm lint`, and `pnpm test --run` finish successfully.
+- The UI can display the sequence and the operation history.
 
-No vertical slice completo, o cenário de aceitação será importar uma entrevista de pelo menos 30 minutos, transcrever, pedir um corte vertical de até 60 segundos, revisar e aprovar um plano, executar operações, desfazer, validar e exportar MP4 1080x1920 e SRT.
+In the complete vertical slice, the acceptance scenario will import an interview of at least 30 minutes, transcribe it, request a vertical cut of up to 60 seconds, review and approve a plan, execute operations, undo, validate, and export MP4 1080x1920 and SRT.
 
 ## Idempotence and Recovery
 
-Todas as migrações devem ser versionadas e reaplicáveis com segurança. Jobs usam uma chave composta por tipo, asset hash, parâmetros normalizados e versão do worker. Arquivos temporários são removidos em sucesso ou falha. Falha de worker deixa o job como retryable ou failed, mas não altera a timeline sem uma operação transacional concluída.
+All migrations must be versioned and safely replayable. Jobs use a key composed of type, asset hash, normalized parameters, and worker version. Temporary files are removed on success or failure. A worker failure leaves the job retryable or failed, but does not change the timeline without a completed transactional operation.
 
-Antes de migrações destrutivas, criar dump do PostgreSQL. Se a instalação parar no meio, derrubar somente os serviços do Compose, preservar volumes e executar novamente a etapa que falhou. O estado materializado pode ser reconstruído a partir do snapshot e do log quando essa rotina for implementada.
+Before destructive migrations, create a PostgreSQL dump. If installation stops midway, bring down only the Compose services, preserve volumes, and rerun the failed step. Materialized state can be rebuilt from the snapshot and log once that routine is implemented.
 
 ## Artifacts and Notes
 
-- Arquitetura: `docs/architecture/agentcut-baseline.md`
-- Componentes: `docs/architecture/components.mmd`
-- Fluxo do agente: `docs/architecture/agent-flow.mmd`
-- Este plano: `execplan/agentcut-mvp.md`
-- Fontes técnicas consultadas: documentação oficial de FFmpeg/ffprobe, WebCodecs, BullMQ, OpenTelemetry, PostgreSQL e OpenTimelineIO.
+- Architecture: `docs/architecture/agentcut-baseline.md`
+- Components: `docs/architecture/components.mmd`
+- Agent flow: `docs/architecture/agent-flow.mmd`
+- This plan: `execplan/agentcut-mvp.md`
+- Technical sources consulted: official documentation for FFmpeg/ffprobe, WebCodecs, BullMQ, OpenTelemetry, PostgreSQL, and OpenTimelineIO.
 
 ## Interfaces and Dependencies
 
-As interfaces iniciais devem ser pequenas e independentes da infraestrutura:
+Initial interfaces should be small and independent of infrastructure:
 
     type RationalTime = { value: string; timescale: string }
 
@@ -164,4 +164,4 @@ As interfaces iniciais devem ser pequenas e independentes da infraestrutura:
       execute(context: ToolContext, input: I): Promise<ToolResult<O>>
     }
 
-Dependências principais: Fastify, TypeBox/Ajv, PostgreSQL com Drizzle ou SQL tipado, Redis/BullMQ, MinIO SDK, FFmpeg/ffprobe, React, TanStack Query, Zustand, Vitest, Playwright, OpenTelemetry e `ulid`. A implementação deve encapsular cada dependência atrás dos pacotes indicados para permitir substituição.
+Main dependencies: Fastify, TypeBox/Ajv, PostgreSQL with Drizzle or typed SQL, Redis/BullMQ, the MinIO SDK, FFmpeg/ffprobe, React, TanStack Query, Zustand, Vitest, Playwright, OpenTelemetry, and `ulid`. The implementation should encapsulate each dependency behind the indicated packages to allow replacement.

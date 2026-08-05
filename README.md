@@ -1,23 +1,23 @@
 # AgentCut Studio
 
-MVP local de um editor de vídeo orientado a agentes de IA.
+A local MVP of an AI-agent-oriented video editor.
 
-O MVP usa somente HTML5, CSS3, JavaScript puro e APIs nativas do navegador. Não exige backend, bundler, dependência ou modelo externo. Os arquivos importados permanecem apenas na memória da aba.
+The MVP uses only HTML5, CSS3, plain JavaScript, and native browser APIs. It requires no backend, bundler, dependency, or external model. Imported files remain only in the tab's memory.
 
-## Abrir diretamente
+## Open directly
 
-Abra `index.html` no navegador. A aplicação não precisa de npm, bundler ou conexão com a internet.
+Open `index.html` in a browser. The application needs no npm, bundler, or internet connection.
 
-Também é possível usar um servidor local opcional, caso o navegador restrinja algum recurso ao abrir por `file://`:
+You can also use an optional local server if the browser restricts a feature when opening through `file://`:
 
 ```bash
 cd "/home/mello/Área de trabalho/Pasta sem título"
 python3 -m http.server 8080
 ```
 
-Depois acesse `http://localhost:8080`.
+Then open `http://localhost:8080`.
 
-## Estrutura
+## Structure
 
 ```text
 index.html
@@ -27,51 +27,51 @@ js/project.js
 js/timeline.js
 js/agent.js
 assets/icons/README.md
-docs/                 # documentação arquitetural preservada
+docs/                 # preserved architecture documentation
 ```
 
-Os scripts são carregados como scripts clássicos, em ordem, para que o arquivo funcione também diretamente via `file://`. O namespace global `window.AgentCut` separa o estado e as responsabilidades sem exigir módulos ou bundler.
+The scripts are loaded as classic scripts, in order, so the file also works directly through `file://`. The global `window.AgentCut` namespace separates state and responsibilities without requiring modules or a bundler.
 
-## Funcionalidades
+## Features
 
-- Biblioteca local para vídeo, áudio e imagem.
-- Preview com `URL.createObjectURL`, play, pause, seek, volume, velocidade e tela cheia.
-- Timeline visual multipista com tracks de vídeo, áudio e texto.
-- Inserção de clips por botão ou duplo clique.
-- Seleção, remoção, zoom e playhead.
-- Divisão não destrutiva no playhead, com bloqueio de tracks e undo/redo.
-- Histórico em memória com desfazer e refazer.
-- Persistência de metadados no `localStorage` usando `agentcut-project-v1`.
-- Exportação de um manifesto `.agentcut.json` usando `Blob`.
-- Runtime local baseado em regras, com contexto estruturado em `window.AgentCut.agent.getContext()`.
-- Planos com aprovação explícita, execução de operações seguras e auditoria no histórico.
-- Mudança de sequência para 1080 × 1920 quando o plano vertical é aprovado.
-- Atalhos: Espaço, Ctrl/Cmd+S, Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Delete e Escape.
+- Local library for video, audio, and image files.
+- Preview with `URL.createObjectURL`, play, pause, seek, volume, playback speed, and fullscreen.
+- Visual multitrack timeline with video, audio, and text tracks.
+- Add clips with a button or double-click.
+- Selection, removal, zoom, and playhead controls.
+- Non-destructive splitting at the playhead, with track locking and undo/redo.
+- In-memory history with undo and redo.
+- Metadata persistence in `localStorage` using `agentcut-project-v1`.
+- Export of an `.agentcut.json` manifest through `Blob`.
+- Local rules-based runtime with structured context from `window.AgentCut.agent.getContext()`.
+- Plans with explicit approval, safe-operation execution, and history auditing.
+- Switch to a 1080 × 1920 sequence when the vertical plan is approved.
+- Shortcuts: Space, Ctrl/Cmd+S, Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Delete, and Escape.
 
-## Limitações intencionais
+## Intentional limitations
 
-- Nenhum arquivo binário é salvo no `localStorage`.
-- Ao recarregar, os metadados são restaurados, mas os arquivos locais precisam ser importados novamente para o preview.
-- O runtime não chama modelos reais. Ele é um adaptador determinístico local para validar o contrato agente, plano, aprovação e operação.
-- A timeline é não destrutiva: divide e remove referências, mas não reencoda nem modifica os arquivos originais.
-- Não há backend, banco de dados, render final, transcrição automática ou upload.
-- Pedidos que dependem de análise de áudio, transcript ou visão ficam como plano revisável, sem execução inventada.
+- No binary file is saved in `localStorage`.
+- After reload, metadata is restored, but local files must be imported again for preview.
+- The runtime does not call real models. It is a deterministic local adapter for validating the agent, plan, approval, and operation contract.
+- The timeline is non-destructive: it splits and removes references, but does not re-encode or modify original files.
+- There is no backend, database, final render, automatic transcription, or upload.
+- Requests that depend on audio analysis, transcripts, or vision remain reviewable plans, without invented execution.
 
-## Verificação manual
+## Manual verification
 
-1. Abra `index.html`.
-2. Importe um vídeo local.
-3. Selecione o item na biblioteca e reproduza o preview.
-4. Adicione o item à timeline por duplo clique ou pelo botão `Timeline`.
-5. Selecione o clip, remova, desfaça e refaça.
-6. Selecione um clipe, mova o playhead para dentro dele e digite `divida o clipe selecionado no playhead`.
-7. Aprove o plano e confirme que dois clipes aparecem na timeline, com uma entrada de operação no histórico.
-8. Use `Ctrl/Cmd+Z` para confirmar o undo. Teste também `crie um vídeo vertical` e aprove a mudança de sequência.
-9. Digite `remova os silêncios` para confirmar que o pedido vira plano revisável, sem alegar uma análise inexistente.
-10. Salve, recarregue a página e exporte o projeto para validar o JSON baixado.
+1. Open `index.html`.
+2. Import a local video.
+3. Select the item in the library and play the preview.
+4. Add the item to the timeline by double-clicking or using the `Timeline` button.
+5. Select the clip, remove it, undo, and redo.
+6. Select a clip, move the playhead inside it, and enter `split the selected clip at the playhead`.
+7. Approve the plan and confirm that two clips appear in the timeline with an operation entry in history.
+8. Use `Ctrl/Cmd+Z` to verify undo. Also test `create a vertical video` and approve the sequence change.
+9. Enter `remove silences` to confirm that the request becomes a reviewable plan without claiming an analysis that did not happen.
+10. Save, reload the page, and export the project to validate the downloaded JSON.
 
-## Contrato mínimo para agents
+## Minimum agent contract
 
-O estado observável fica em `window.AgentCut.getState()`. O contexto seguro para um agent é obtido por `window.AgentCut.agent.getContext()`. Ele informa assets, sequência, tracks, seleção, capacidades disponíveis e a política de aprovação. Operações mutáveis passam pelo fluxo de plano e aprovação, nunca por escrita direta no estado.
+Observable state is available through `window.AgentCut.getState()`. A safe context for an agent is available through `window.AgentCut.agent.getContext()`. It reports assets, sequence, tracks, selection, available capabilities, and the approval policy. Mutable operations always go through the plan-and-approval flow, never through direct state writes.
 
-Os diagramas e a documentação arquitetural existentes em `docs/` foram preservados.
+The existing diagrams and architecture documentation in `docs/` are preserved.
