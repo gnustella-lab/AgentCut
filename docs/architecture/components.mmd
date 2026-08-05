@@ -1,0 +1,52 @@
+flowchart LR
+    UI[Web UI\nReact + Vite] --> API[API + WebSocket\nFastify]
+    SDK[SDK / CLI / Agentes externos] --> API
+
+    subgraph ControlPlane[Control plane]
+        AUTH[Auth + RBAC + Policy]
+        PROJECT[Project domain]
+        TIMELINE[Timeline domain]
+        OPS[Operation Engine]
+        AGENT[Agent Editing Runtime]
+        CONTRACTS[JSON Schema + OpenAPI]
+    end
+
+    API --> AUTH
+    API --> PROJECT
+    API --> TIMELINE
+    API --> AGENT
+    PROJECT --> OPS
+    TIMELINE --> OPS
+    AGENT --> OPS
+    CONTRACTS --> API
+    CONTRACTS --> SDK
+
+    OPS --> PG[(PostgreSQL\nstate + operations + audit)]
+    AGENT --> REDIS[(Redis + BullMQ)]
+    PROJECT --> S3[(MinIO / S3\noriginals + variants)]
+
+    subgraph Workers[Workers isolados]
+        PROBE[Probe / metadata]
+        MEDIA[Proxy / thumbnails / waveform]
+        AI[Transcription / analysis / embeddings]
+        RENDER[Render / export]
+        QC[Quality control]
+    end
+
+    REDIS --> PROBE
+    REDIS --> MEDIA
+    REDIS --> AI
+    REDIS --> RENDER
+    REDIS --> QC
+    PROBE --> S3
+    MEDIA --> S3
+    AI --> PG
+    RENDER --> S3
+    QC --> PG
+    RENDER --> FFMPEG[MediaPipeline\nFFmpeg + ffprobe]
+    AI --> PROVIDERS[AI provider adapters\nlocal or hosted]
+
+    API --> EVENTS[Event stream]
+    EVENTS --> UI
+    API --> OTEL[OpenTelemetry]
+    Workers --> OTEL

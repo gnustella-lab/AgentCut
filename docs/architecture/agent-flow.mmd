@@ -1,0 +1,36 @@
+sequenceDiagram
+    actor Human as Humano
+    participant UI as UI ou SDK
+    participant API as API
+    participant RT as Agent Editing Runtime
+    participant IDX as Contexto e índice multimodal
+    participant POL as Policy Engine
+    participant OP as Operation Engine
+    participant Q as BullMQ
+    participant W as Worker
+    participant QC as Quality Control
+    participant DB as PostgreSQL
+
+    Human->>UI: Instrução em linguagem natural
+    UI->>API: Criar AgentSession
+    API->>RT: compreender(instrução, restrições)
+    RT->>IDX: inspecionar projeto, mídia e transcript
+    IDX-->>RT: evidências com tempo, modelo e confiança
+    RT->>RT: gerar plano estruturado
+    RT->>OP: simular operações atômicas
+    OP-->>RT: diff, duração, alertas e custo
+    RT->>POL: verificar permissões, orçamento e aprovação
+    POL-->>UI: Plano aguardando aprovação
+    Human->>UI: Aprovar ou rejeitar
+    UI->>API: aprovação do plano
+    API->>RT: executar plano
+    RT->>OP: aplicar operação com precondições
+    OP->>DB: transação, log e projeção
+    OP-->>RT: resultado e operação inversa
+    RT->>Q: jobs de análise/render/QC
+    Q->>W: executar job idempotente
+    W-->>DB: progresso, logs, artefacts e métricas
+    W->>QC: validar output
+    QC-->>RT: relatório de qualidade
+    RT-->>UI: mudanças, motivos, confiança e alertas
+    UI-->>Human: resultado, timeline, undo e export
