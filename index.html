@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0c0f14">
-  <meta name="description" content="AgentCut, an AI-agent-oriented video editing studio prototype.">
-  <title>AgentCut Studio</title>
+  <meta name="description" content="AgentCut, an agent-first video editor where one brief becomes a complete local edit mission.">
+  <title>AgentCut · Agent-first video editor</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
         <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
         <div>
           <div class="brand-name">Agent<span>Cut</span></div>
-          <div class="brand-subtitle">AI EDITING STUDIO</div>
+          <div class="brand-subtitle">AGENT-FIRST VIDEO EDITOR</div>
         </div>
       </div>
 
@@ -104,7 +104,7 @@
         <section class="preview-panel" aria-label="Preview player">
           <div class="preview-header">
             <div>
-              <span class="eyebrow">PREVIEW</span>
+              <span class="eyebrow">OUTPUT PREVIEW</span>
               <h1 id="preview-title">No media selected</h1>
             </div>
             <div class="preview-header-tools">
@@ -128,8 +128,8 @@
             </div>
             <div class="preview-empty" id="preview-empty">
               <div class="preview-empty-icon"><svg aria-hidden="true"><use href="#icon-play"></use></svg></div>
-              <strong>Select media to preview</strong>
-              <span>Preview uses only local files held in memory.</span>
+              <strong>Add footage to start a mission</strong>
+              <span>The Director uses local files held in memory.</span>
             </div>
             <div class="preview-overlay-top">
               <span class="overlay-chip"><span class="live-dot"></span> LOCAL PREVIEW</span>
@@ -194,26 +194,69 @@
         </section>
       </section>
 
-      <aside class="panel agent-panel" id="agent-panel" aria-label="Editing agent panel">
+      <aside class="panel agent-panel" id="agent-panel" aria-label="AI editing director">
         <div class="panel-header agent-panel-header">
           <div class="panel-title-group">
-            <span class="eyebrow eyebrow-accent">RUNTIME</span>
-            <h2><span class="agent-spark"><svg aria-hidden="true"><use href="#icon-spark"></use></svg></span> Editing agent</h2>
+            <span class="eyebrow eyebrow-accent">DIRECTOR</span>
+            <h2><span class="agent-spark"><svg aria-hidden="true"><use href="#icon-spark"></use></svg></span> Agent Director</h2>
+            <span class="panel-subtitle">One brief → one complete edit</span>
           </div>
-          <button class="panel-collapse" type="button" data-collapse="agent" aria-label="Collapse agent panel" title="Collapse panel">
+          <button class="panel-collapse" type="button" data-collapse="agent" aria-label="Collapse agent director" title="Collapse panel">
             <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
           </button>
         </div>
 
         <div class="panel-content agent-panel-content">
+          <section class="agent-hero" aria-labelledby="agent-hero-title">
+            <span class="mission-kicker"><span class="mission-live-dot"></span> FULL EDIT MODE</span>
+            <h3 id="agent-hero-title">Give the outcome. AgentCut builds the cut.</h3>
+            <p>Describe the audience, feeling, format, and finish. The agent turns one brief into a complete edit mission.</p>
+          </section>
+
           <div class="agent-mode-row">
-            <label for="agent-mode">Mode</label>
+            <label for="agent-mode">Run style</label>
             <select id="agent-mode">
-              <option value="assistant">Assistant</option>
-              <option value="copilot">Copilot</option>
-              <option value="supervised">Supervised autonomy</option>
+              <option value="autonomous">Autopilot · one approval</option>
+              <option value="assistant">Plan only</option>
             </select>
             <span class="agent-status" id="agent-status"><span></span> Ready</span>
+          </div>
+
+          <div class="mission-context" aria-label="Current edit mission context">
+            <div>
+              <span class="eyebrow">SOURCE</span>
+              <strong id="agent-source-label">Waiting for footage</strong>
+            </div>
+            <div>
+              <span class="eyebrow">DELIVERY</span>
+              <strong id="agent-target-label">Brief not set</strong>
+            </div>
+          </div>
+
+          <form class="agent-composer mission-composer" id="agent-form">
+            <label class="sr-only" for="agent-input">Full edit brief</label>
+            <textarea id="agent-input" rows="4" placeholder="Example: Turn this interview into a 45-second vertical reel with a strong hook, clean audio, and captions..." spellcheck="true"></textarea>
+            <div class="composer-footer">
+              <span class="composer-hint"><kbd>Enter</kbd> plan mission · <kbd>Shift+Enter</kbd> new line</span>
+              <button class="send-button" type="submit" aria-label="Plan full edit" title="Plan full edit">
+                <svg aria-hidden="true"><use href="#icon-send"></use></svg>
+                <span>Plan edit</span>
+              </button>
+            </div>
+          </form>
+
+          <div class="agent-examples mission-examples">
+            <div class="examples-heading">
+              <span class="eyebrow">BRIEF STARTERS</span>
+              <span class="examples-note">Tell it what success looks like</span>
+            </div>
+            <div class="example-chips">
+              <button type="button" data-agent-example="Turn this footage into a 45-second vertical reel with captions.">Vertical reel</button>
+              <button type="button" data-agent-example="Edit this interview into a concise YouTube cut with a strong opening.">YouTube cut</button>
+              <button type="button" data-agent-example="Make a polished social clip, remove dead air, clean the audio, and add subtitles.">Social polish</button>
+              <button type="button" data-agent-example="Create a 16:9 product video with a clear hook and a clean ending.">Product story</button>
+              <button type="button" data-agent-example="Use this footage to make a short, energetic highlight reel.">Highlight reel</button>
+            </div>
           </div>
 
           <div class="agent-messages" id="agent-messages" aria-live="polite"></div>
@@ -221,43 +264,33 @@
           <div class="agent-plan-card" id="agent-plan-card" hidden>
             <div class="plan-card-header">
               <div>
-                <span class="eyebrow eyebrow-accent">PROPOSED PLAN</span>
-                <strong id="agent-plan-title">Editing plan</strong>
+                <span class="eyebrow eyebrow-accent">EDIT BLUEPRINT</span>
+                <strong id="agent-plan-title">Full edit mission</strong>
               </div>
-              <span class="plan-status" id="agent-plan-status">SIMULATION</span>
+              <span class="plan-status" id="agent-plan-status">READY TO RUN</span>
             </div>
             <ol class="plan-steps" id="agent-plan-steps"></ol>
             <div class="plan-card-footer">
-              <span id="agent-plan-confidence">Simulation, no real changes</span>
-              <button class="text-button" id="approve-plan-button" type="button">Mark as reviewed</button>
+              <span id="agent-plan-confidence">One approval runs the complete local mission</span>
+              <button class="text-button" id="approve-plan-button" type="button">Approve &amp; run edit</button>
             </div>
           </div>
 
-          <div class="agent-examples">
-            <span class="eyebrow">QUICK EXAMPLES</span>
-            <div class="example-chips">
-              <button type="button" data-agent-example="Remove the selected clip.">Remove clip</button>
-              <button type="button" data-agent-example="Split the selected clip at the playhead.">Split at playhead</button>
-              <button type="button" data-agent-example="Create a vertical video up to 60 seconds.">Vertical crop</button>
-              <button type="button" data-agent-example="Remove silences longer than 800 ms.">Remove silences</button>
-              <button type="button" data-agent-example="Generate dynamic captions.">Generate captions</button>
+          <div class="workflow-card" id="agent-progress-card" hidden aria-live="polite">
+            <div class="workflow-card-heading">
+              <div>
+                <span class="eyebrow eyebrow-accent">MISSION STATUS</span>
+                <strong id="agent-progress-stage">Waiting for a brief</strong>
+              </div>
+              <span class="workflow-progress-value" id="agent-progress-value">0%</span>
             </div>
+            <div class="workflow-progress-track"><span id="agent-progress-bar"></span></div>
+            <span class="workflow-progress-detail" id="agent-progress-detail">The agent will report each step here.</span>
           </div>
-
-          <form class="agent-composer" id="agent-form">
-            <label class="sr-only" for="agent-input">Agent instruction</label>
-            <textarea id="agent-input" rows="2" placeholder="Tell the agent what to edit..." spellcheck="true"></textarea>
-            <div class="composer-footer">
-              <span class="composer-hint"><kbd>Enter</kbd> send · <kbd>Shift+Enter</kbd> new line</span>
-              <button class="send-button" type="submit" aria-label="Run instruction" title="Run instruction">
-                <svg aria-hidden="true"><use href="#icon-send"></use></svg>
-              </button>
-            </div>
-          </form>
 
           <div class="agent-history">
             <div class="history-heading">
-              <span class="eyebrow">ACTIVITY</span>
+              <span class="eyebrow">MISSION LOG</span>
               <span class="history-count" id="agent-history-count">0</span>
             </div>
             <div class="history-list" id="agent-history-list"></div>
@@ -266,11 +299,11 @@
       </aside>
     </main>
 
-    <section class="timeline-panel" aria-label="Timeline multipista">
+    <section class="timeline-panel" aria-label="Agent-composed edit timeline">
       <div class="timeline-toolbar">
         <div class="timeline-title-group">
-          <span class="eyebrow">MAIN SEQUENCE</span>
-          <strong>Timeline</strong>
+          <span class="eyebrow">AGENT-COMPOSED SEQUENCE</span>
+          <strong>Edit timeline</strong>
           <span class="sequence-badge" id="sequence-badge">1920 × 1080 · 30 fps</span>
         </div>
         <div class="timeline-tools">

@@ -1,52 +1,24 @@
 flowchart LR
-    UI[Web UI\nReact + Vite] --> API[API + WebSocket\nFastify]
-    SDK[SDK / CLI / External agents] --> API
+    USER[User\nedit brief] --> UI[Agent Director\nstatic browser UI]
 
-    subgraph ControlPlane[Control plane]
-        AUTH[Auth + RBAC + Policy]
-        PROJECT[Project domain]
-        TIMELINE[Timeline domain]
-        OPS[Operation Engine]
-        AGENT[Agent Editing Runtime]
-        CONTRACTS[JSON Schema + OpenAPI]
+    subgraph Browser[Local AgentCut runtime]
+        PROJECT[Project state\nmedia + sequence + persistence]
+        CONTEXT[Context builder\nagentcut-context-v2]
+        DIRECTOR[Local Director\nintent + blueprint + mission]
+        POLICY[Approval policy\none approval for full mission]
+        TIMELINE[Timeline engine\nlocked tracks + safe operations]
+        HISTORY[History\nundo / redo / manifest]
+        PREVIEW[Local preview\nobject URLs]
     end
 
-    API --> AUTH
-    API --> PROJECT
-    API --> TIMELINE
-    API --> AGENT
-    PROJECT --> OPS
-    TIMELINE --> OPS
-    AGENT --> OPS
-    CONTRACTS --> API
-    CONTRACTS --> SDK
+    UI --> CONTEXT
+    CONTEXT --> DIRECTOR
+    PROJECT --> CONTEXT
+    DIRECTOR --> POLICY
+    POLICY --> TIMELINE
+    TIMELINE --> PROJECT
+    TIMELINE --> HISTORY
+    PROJECT --> PREVIEW
+    HISTORY --> UI
 
-    OPS --> PG[(PostgreSQL\nstate + operations + audit)]
-    AGENT --> REDIS[(Redis + BullMQ)]
-    PROJECT --> S3[(MinIO / S3\noriginals + variants)]
-
-    subgraph Workers[Isolated workers]
-        PROBE[Probe / metadata]
-        MEDIA[Proxy / thumbnails / waveform]
-        AI[Transcription / analysis / embeddings]
-        RENDER[Render / export]
-        QC[Quality control]
-    end
-
-    REDIS --> PROBE
-    REDIS --> MEDIA
-    REDIS --> AI
-    REDIS --> RENDER
-    REDIS --> QC
-    PROBE --> S3
-    MEDIA --> S3
-    AI --> PG
-    RENDER --> S3
-    QC --> PG
-    RENDER --> FFMPEG[MediaPipeline\nFFmpeg + ffprobe]
-    AI --> PROVIDERS[AI provider adapters\nlocal or hosted]
-
-    API --> EVENTS[Event stream]
-    EVENTS --> UI
-    API --> OTEL[OpenTelemetry]
-    Workers --> OTEL
+    DIRECTOR -. held until evidence .-> ANALYSIS[Future transcript / audio / vision / render workers]

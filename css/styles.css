@@ -1459,3 +1459,77 @@ svg {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Agent-first director treatment */
+.workspace { grid-template-columns: 246px minmax(430px, 1fr) 414px; }
+.agent-panel { background: radial-gradient(circle at 18% 0%, rgba(139, 108, 255, 0.08), transparent 34%), var(--panel); }
+.agent-panel-header { min-height: 72px; padding-top: 13px; padding-bottom: 12px; }
+.agent-panel-header .panel-title-group { min-width: 0; }
+.agent-panel-header .panel-subtitle { display: block; margin-top: 5px; color: var(--text-faint); font-size: 9px; }
+.agent-panel-content { padding: 15px; }
+.agent-hero {
+  position: relative;
+  margin: -1px 0 13px;
+  padding: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(139, 108, 255, 0.24);
+  border-radius: 10px;
+  background: linear-gradient(140deg, rgba(139, 108, 255, 0.18), rgba(73, 200, 223, 0.05) 62%, rgba(18, 23, 32, 0.1));
+}
+.agent-hero::after { content: ""; position: absolute; right: -38px; bottom: -46px; width: 122px; height: 122px; border: 1px solid rgba(139, 108, 255, 0.2); border-radius: 50%; box-shadow: 0 0 0 16px rgba(139, 108, 255, 0.03), 0 0 0 32px rgba(139, 108, 255, 0.025); }
+.mission-kicker { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px; color: #b9afff; font-size: 8px; font-weight: 750; letter-spacing: 0.12em; }
+.mission-live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px rgba(67, 211, 146, 0.65); }
+.agent-hero h3 { position: relative; z-index: 1; max-width: 270px; margin: 9px 0 6px; color: #f2efff; font-size: 17px; line-height: 1.16; letter-spacing: -0.025em; }
+.agent-hero p { position: relative; z-index: 1; max-width: 330px; margin: 0; color: #aaa8bd; font-size: 10px; line-height: 1.5; }
+.agent-mode-row { padding: 0 0 12px; border-bottom: 1px solid var(--border-soft); }
+.agent-mode-row label { color: var(--text-muted); font-size: 9px; font-weight: 650; letter-spacing: 0.03em; }
+.agent-mode-row select { min-height: 30px; color: #d9d3ff; border-color: rgba(139, 108, 255, 0.28); background: rgba(28, 25, 50, 0.64); }
+.mission-context { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin: 12px 0; }
+.mission-context > div { min-width: 0; padding: 9px 10px; border: 1px solid var(--border-soft); border-radius: 7px; background: rgba(17, 21, 29, 0.64); }
+.mission-context strong { display: block; overflow: hidden; margin-top: 5px; color: var(--text-secondary); font-size: 9px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.mission-composer { padding: 10px; border-color: rgba(139, 108, 255, 0.36); background: rgba(14, 17, 24, 0.84); }
+.mission-composer textarea { min-height: 78px; color: #eeeaff; font-size: 11px; }
+.mission-composer textarea::placeholder { color: #77748b; }
+.composer-footer { margin-top: 9px; }
+.composer-hint kbd { color: #c8c0ff; }
+.send-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: auto; min-width: 86px; height: 31px; padding: 0 10px; border-radius: 7px; font-size: 9px; font-weight: 700; }
+.send-button span { display: inline; }
+.send-button svg { width: 13px; height: 13px; }
+.mission-examples { padding: 12px 0 11px; border-top: 0; border-bottom: 1px solid var(--border-soft); }
+.examples-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.examples-note { color: var(--text-faint); font-size: 8px; }
+.mission-examples .example-chips { margin-top: 8px; }
+.mission-examples .example-chips button { color: #aaa4c8; border-color: rgba(139, 108, 255, 0.21); background: rgba(139, 108, 255, 0.06); }
+.agent-messages { max-height: 142px; padding: 12px 0 2px; }
+.agent-plan-card { margin: 12px 0 0; padding: 12px; border-color: rgba(139, 108, 255, 0.44); background: linear-gradient(145deg, rgba(139, 108, 255, 0.16), rgba(24, 20, 48, 0.18)); }
+.plan-card-header strong { color: #eeeaff; font-size: 12px; }
+.plan-steps { gap: 7px; margin-top: 12px; font-size: 10px; }
+.plan-step { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 8px; padding: 0 0 1px 3px; }
+.plan-step small { grid-column: 1 / -1; color: var(--text-faint); font-size: 8px; line-height: 1.35; }
+.plan-step-label { min-width: 0; }
+.plan-step-state { align-self: start; color: #aaa1e7; font-size: 7px; font-weight: 750; letter-spacing: 0.08em; }
+.plan-step-done .plan-step-label { color: #b7efd5; }
+.plan-step-done .plan-step-state { color: var(--success); }
+.plan-step-deferred .plan-step-label { color: #c4bca2; }
+.plan-step-deferred .plan-step-state { color: var(--warning); }
+.plan-step-blocked .plan-step-label { color: #f2aaaa; }
+.plan-step-blocked .plan-step-state { color: var(--danger); }
+.plan-step-skipped { opacity: 0.56; }
+.plan-step-skipped .plan-step-state { color: var(--text-faint); }
+.workflow-card { margin-top: 11px; padding: 11px 12px; border: 1px solid rgba(73, 200, 223, 0.28); border-radius: 9px; background: linear-gradient(140deg, rgba(73, 200, 223, 0.08), rgba(18, 31, 40, 0.24)); }
+.workflow-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.workflow-card-heading strong { display: block; margin-top: 4px; color: var(--text-secondary); font-size: 10px; }
+.workflow-progress-value { color: var(--cyan); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 10px; }
+.workflow-progress-track { height: 5px; margin: 10px 0 7px; overflow: hidden; border-radius: 99px; background: rgba(73, 200, 223, 0.12); }
+.workflow-progress-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--cyan)); box-shadow: 0 0 9px rgba(73, 200, 223, 0.4); transition: width 180ms ease; }
+.workflow-progress-detail { color: var(--text-faint); font-size: 8px; }
+.agent-history { margin-top: 13px; }
+
+@media (max-width: 1160px) {
+  .workspace { grid-template-columns: 224px minmax(390px, 1fr) 370px; }
+}
+
+@media (max-width: 980px) {
+  .workspace { grid-template-columns: 210px minmax(350px, 1fr) 340px; }
+  .agent-hero h3 { font-size: 15px; }
+}

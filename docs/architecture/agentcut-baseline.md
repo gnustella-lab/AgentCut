@@ -1,80 +1,101 @@
-# AgentCut, architectural baseline
-
-Status: architectural baseline for the full version. The repository also contains a functional local MVP, without a backend, for validating the agent → plan → approval → operation flow.
+# AgentCut agent-first baseline
 
 ## Purpose
 
-AgentCut will be a non-destructive video editor in which humans and agents use the same project state. The source of truth will be a deterministic timeline representation accompanied by atomic operations, versions, preconditions, inverses, and auditing. The visual interface, SDK, and external agents will be clients of this core, not parallel implementations of editing logic.
+AgentCut is a local, static video editor whose primary interaction is an edit brief. The user describes the outcome, the local Director converts that intent into an explicit Edit Blueprint, and one approval runs the safe portion of the mission as a reversible composite command.
 
-## Assumptions
+The current delivery optimizes for agent behavior and auditability instead of professional rendering breadth. The app is a real browser implementation, not a visual mock, but it deliberately does not claim to have transcript, audio, vision, or render workers.
 
-- The first product is a desktop-first web application, with a separate API and local or distributed workers.
-- The MVP prioritizes a reproducible local experience. Collaboration, publishing, and distributed rendering are deferred to later phases.
-- Original files are immutable and content-addressed with SHA-256.
-- The system supports local and hosted models through adapters. No AI provider is a domain requirement.
-- Determinism means the same render plan every time. Byte-for-byte export will be guaranteed in a reproducible CPU profile with a pinned toolchain. Hardware acceleration will be marked as non-bit-exact.
+## Product loop
 
-## Architecture
+```text
+brief
+  ↓
+local project context
+  ↓
+Edit Blueprint: source, target, ordered steps, readiness, held work
+  ↓
+explicit approval
+  ↓
+composite full-edit operation
+  ↓
+timeline + mission progress + history + undo/redo
+```
 
-The first version uses a modular monolith, not a fleet of microservices. The API, domain, and runtime are separated by modules and contracts. Workers execute heavy tasks through queues. When operational needs arise, each module can be extracted without changing public contracts.
+The Director treats one full-edit request as a mission rather than a sequence of unrelated assistant replies. The mission records the requested delivery, source asset, supported actions, analysis-dependent actions, and the reason a step is held.
 
-Layers:
+## Current implementation
 
-1. `apps/web`: React UI, player, library, timeline, transcript, and agent panel.
-2. `apps/api`: authentication, REST, WebSocket, policies, project domain, and operations.
-3. `apps/worker`: media, analysis, render, and quality-control jobs.
-4. `packages/timeline-engine`: time model and invariants.
-5. `packages/operation-engine`: validation, application, inversion, dry runs, and conflicts.
-6. `packages/agent-runtime`: context, planning, catalog, policy, execution, approval, and review.
-7. `packages/media-pipeline`: typed abstraction over `ffprobe`, FFmpeg, codecs, and filters.
-8. `packages/render-engine`: compiler from the timeline to Render IR and an executable pipeline.
-9. `packages/contracts`: JSON schemas, events, errors, and OpenAPI contracts.
-10. `packages/sdk`: TypeScript client for applications and external agents.
+### Static application shell
 
-Local infrastructure: PostgreSQL, Redis, MinIO, and FFmpeg. PostgreSQL stores materialized state, the operation log, analyses, and audit data. Redis and BullMQ orchestrate jobs. MinIO provides a local S3 API for originals, proxies, and exports.
+`index.html` is the only document. `css/styles.css` provides the dark editing workspace and Agent Director treatment. The application uses no framework, module loader, bundler, package manager, backend, database, or network model.
 
-## Timeline
+### Project state
 
-Time is rational, not a JavaScript `number`. The JSON form is:
+`js/project.js` owns the state graph:
 
-    { "value": "24000", "timescale": "1001" }
+- project metadata and dirty state;
+- media metadata and in-memory object URLs;
+- sequence settings;
+- video, audio, and text tracks;
+- selected media and timeline item;
+- agent messages, plans, and the current mission;
+- undo/redo snapshots and the exportable manifest.
 
-The time library normalizes fractions, compares values without floating point, and converts to frames or samples with explicit rounding. Each clip has a `timeline_range` and a `source_range`; duration is derived and validated. Tracks, effects, keyframes, masks, audio links, and semantic tags live in sequence state.
+Persisted metadata remains compatible with `agentcut-project-v1`. The new mission state is additive and is restored with defaults when an older local project is opened.
 
-Persistence uses an operation log plus a materialized projection. Each operation records the actor, parameters, preconditions, previous state, next state, reason, confidence, tool version, idempotency key, and inverse operation. Snapshots reduce reconstruction cost. The domain does not depend on the UI.
+### Director runtime
 
-## Agent runtime
+`js/agent.js` owns the local agent contract:
 
-The cycle is: understand, inspect, plan, simulate, request approval according to policy, execute, validate, review, and present. The model never writes directly to the database. It produces typed tool calls. Every mutable tool creates atomic operations through the `OperationEngine`.
+1. normalize and classify the natural-language brief;
+2. detect a full-edit intent before falling back to atomic commands;
+3. choose the selected video or first available video as the source;
+4. infer delivery intent such as vertical 9:16;
+5. create an ordered blueprint with `ready`, `blocked`, `deferred`, and `skipped` states;
+6. require explicit approval;
+7. execute the safe local portion as one composite history command;
+8. update progress and preserve a complete inverse operation.
 
-The runtime has adapters for planning, transcription, vision, embeddings, audio, and generation. The MVP includes a deterministic planner for testing and an adapter compatible with structured chat APIs. Transcript text, OCR, and media descriptions are untrusted evidence, never system instructions.
+The runtime exposes `window.AgentCut.agent.getContext()`, schema `agentcut-context-v2`. The context contains project, sequence, media availability, tracks, selection, mission state, capabilities, and the approval policy.
 
-## Rendering
+### Timeline engine
 
-The timeline is compiled into a versioned `RenderPlan`. The plan resolves assets by hash, normalizes timebases, assembles video and audio tracks, applies effects, composes captions, and defines codecs. `MediaPipeline` creates argument lists and never concatenates shell strings. `ffprobe` validates inputs and outputs.
+`js/timeline.js` owns timeline mutations and enforces track locks and selection preconditions. It supports:
 
-The cache uses the asset hash, snapshot, Render IR, preset, and toolchain. The manifest records hashes, parameters, logs, costs, and artifacts. The reproducible profile uses CPU, fixed metadata, and explicitly defined codec parameters.
+- adding media to a track;
+- removing the selected clip;
+- splitting the selected clip at the playhead;
+- changing sequence settings;
+- dispatching `agent.full-edit` to the Director's composite executor;
+- recalculating duration and rendering the visual timeline.
 
-## Security
+The composite command adds the selected source when necessary, selects it, applies the requested sequence target, updates the mission, and records before/after snapshots. Undo restores the entire mission, not only its last sub-step.
 
-All access is limited by workspace and project. Uploads pass size limits, real MIME checks, `ffprobe`, safe naming, a temporary directory, and hash-based storage. Workers run in a sandbox with an isolated working directory, without a shell, and with CPU, memory, process, and network limits.
+## Safety contract
 
-Agents receive their own permissions and budgets. Policy can block deletion, external sending, publishing, resolution changes, operation counts, cost, and rendering. An operation is denied before touching state when approval is missing. Media URLs are signed and expire.
+- Approval is explicit. Autopilot means one approval for the whole mission, not silent mutation while the user is typing.
+- Original media is immutable.
+- Only known operations can mutate the project.
+- Locked tracks reject changes.
+- A plan captures its target before approval and can reject stale selections.
+- Unsupported analysis is reported as held work, never fabricated as completed work.
+- Every mutation is represented in the history log and remains undoable.
 
-## MVP
+## Deliberate boundaries
 
-The MVP delivers project creation, video and audio import, probing, proxies, thumbnails, waveform, a basic multitrack timeline, a player, cut, move, split, trim, delete, undo, adapter-based transcription, transcript editing, silence removal, captions, vertical reframing, normalization, agent plans, dry runs, approval, execution, auditing, validation, preview, MP4 1080x1920, and SRT/VTT.
+The local MVP cannot safely perform work that requires evidence it does not have. Silence removal, highlight selection, caption generation, audio cleanup, subject tracking, and MP4 rendering are represented in the blueprint but remain held until future local workers provide the necessary evidence and artifacts.
 
-The following remain outside the MVP: real-time collaboration, full branches and merges, advanced tracking, background removal, a model marketplace, publishing, distributed rendering, all professional scopes, and GPU bit-exactness.
+This boundary is part of the product design: an agent-first editor must be transparent about what it knows, what it can change, and what still needs a media capability.
 
-## Integration decisions
+## Extension path
 
-- FFmpeg and `ffprobe` sit behind `MediaPipeline` because of the breadth of filters and the need to test generated arguments.
-- BullMQ is used for the MVP because it provides Redis queues, retries, priorities, concurrency, progress, and worker recovery. The database remains the source of truth and idempotency is guaranteed by the domain. Temporal is a future option for long-running workflows with many human pauses.
-- OpenTimelineIO will be an interchange adapter, not the canonical model, because the AgentCut domain must include operations, approval, permissions, costs, and auditing.
-- WebCodecs will be used opportunistically for preview inside Dedicated Workers, with HTML video and proxy fallback. Export remains in a worker.
-- OpenTelemetry will instrument the API and workers. Critical instrumentation will not depend on the browser's experimental status.
+Future capabilities should plug into the same mission contract:
 
-## Design criteria
+- transcript provider adds time-aligned speech evidence;
+- waveform/audio analyzer adds measurable silence and loudness evidence;
+- vision analyzer adds scene, subject, and framing evidence;
+- render worker turns the approved timeline into MP4 and caption artifacts;
+- quality control validates the exported result before delivery.
 
-A change is complete only when its operation has been validated, persisted with preconditions, recorded in the audit log, made reversible when applicable, and included in a consistent state projection. Job failures must not partially change the timeline.
+Each extension should contribute evidence and reversible operations to the blueprint. It should not bypass the approval, policy, history, or immutable-source boundaries.

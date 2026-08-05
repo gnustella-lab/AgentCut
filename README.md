@@ -1,17 +1,31 @@
-# AgentCut Studio
+# AgentCut
 
-A local MVP of an AI-agent-oriented video editor.
+AgentCut is an agent-first local video editor. The main workflow is not a collection of manual editing buttons: you describe the result you want, the Director turns that brief into a complete edit mission, and one approval runs the safe steps in sequence.
 
-The MVP uses only HTML5, CSS3, plain JavaScript, and native browser APIs. It requires no backend, bundler, dependency, or external model. Imported files remain only in the tab's memory.
+The MVP is intentionally static and local. It uses HTML, CSS, plain JavaScript, and native browser APIs. There is no backend, bundler, package manager, external model, or upload service.
 
-## Open directly
+## The agent-first workflow
 
-Open `index.html` in a browser. The application needs no npm, bundler, or internet connection.
+1. Import a source video into the local library.
+2. Describe the outcome in the Agent Director, for example:
 
-You can also use an optional local server if the browser restricts a feature when opening through `file://`:
+   `Turn this interview into a 45-second vertical reel with a strong hook, clean audio, and captions.`
+
+3. AgentCut creates an **Edit Blueprint** with the source, delivery target, ordered steps, readiness, and analysis-dependent work.
+4. Choose **Autopilot · one approval** and approve the blueprint once.
+5. The Director runs the complete local mission as one reversible history command, updates the timeline, reports progress, and keeps undo available.
+6. Review the resulting timeline and export the project manifest when ready.
+
+The agent can choose the primary video, place it on an unlocked video track, switch the sequence to 9:16 when requested, preserve the source file, and record every decision. Steps that require transcription, waveform analysis, vision, captions, audio processing, or rendering are shown as **HELD**, never simulated as if they had run.
+
+## Open locally
+
+Open `index.html` in a browser. The app needs no npm install or internet connection.
+
+An optional local server is useful when browser security restricts a `file://` feature:
 
 ```bash
-cd "/home/mello/Área de trabalho/Pasta sem título"
+cd "/home/mello/Área de trabalho/AgentCut"
 python3 -m http.server 8080
 ```
 
@@ -27,54 +41,56 @@ js/project.js
 js/timeline.js
 js/agent.js
 assets/icons/README.md
-docs/                 # preserved architecture documentation
+docs/architecture/
+execplan/
+LICENSE
 ```
 
-The scripts are loaded as classic scripts, in order, so the file also works directly through `file://`. The global `window.AgentCut` namespace separates state and responsibilities without requiring modules or a bundler.
+The scripts are loaded as classic scripts in dependency order, so the prototype also works when opened directly. The `window.AgentCut` namespace separates state, timeline, project, and agent responsibilities without a framework or bundler.
 
-## Features
+## Product surface
 
-- Local library for video, audio, and image files.
-- Preview with `URL.createObjectURL`, play, pause, seek, volume, playback speed, and fullscreen.
-- Visual multitrack timeline with video, audio, and text tracks.
-- Add clips with a button or double-click.
-- Selection, removal, zoom, and playhead controls.
-- Non-destructive splitting at the playhead, with track locking and undo/redo.
-- In-memory history with undo and redo.
-- Metadata persistence in `localStorage` using `agentcut-project-v1`.
-- Export of an `.agentcut.json` manifest through `Blob`.
-- Local rules-based runtime with structured context from `window.AgentCut.agent.getContext()`.
-- Plans with explicit approval, safe-operation execution, and history auditing.
-- Switch to a 1080 × 1920 sequence when the vertical plan is approved.
-- Shortcuts: Space, Ctrl/Cmd+S, Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Delete, and Escape.
+- Agent Director with a full-edit brief composer and brief starters.
+- Persistent mission context showing source footage and delivery target.
+- End-to-end Edit Blueprint with ordered steps and readiness states.
+- One-approval autopilot for a complete safe local mission.
+- Composite mission execution with progress, held-step reporting, audit history, undo, and redo.
+- Deterministic local rules for full edits, vertical delivery, selected-clip removal, and splitting at the playhead.
+- Local video, audio, and image library with preview, seek, volume, speed, and fullscreen controls.
+- Non-destructive multitrack timeline with locked tracks and selection guards.
+- `localStorage` metadata persistence using `agentcut-project-v1`.
+- `.agentcut.json` manifest export through the native `Blob` API.
+- Structured context through `window.AgentCut.agent.getContext()`, schema `agentcut-context-v2`.
 
-## Intentional limitations
+## Intentional boundaries
 
-- No binary file is saved in `localStorage`.
-- After reload, metadata is restored, but local files must be imported again for preview.
-- The runtime does not call real models. It is a deterministic local adapter for validating the agent, plan, approval, and operation contract.
-- The timeline is non-destructive: it splits and removes references, but does not re-encode or modify original files.
-- There is no backend, database, final render, automatic transcription, or upload.
-- Requests that depend on audio analysis, transcripts, or vision remain reviewable plans, without invented execution.
+- No remote LLM is called. The current Director is deterministic and local so every plan is inspectable and reproducible.
+- No binary media is stored in `localStorage`. After reload, metadata is restored, but source files must be imported again for preview or execution.
+- The timeline is non-destructive. It references and rearranges source media without changing the original files.
+- There is no backend, database, final MP4 renderer, automatic transcription, waveform analysis, computer vision, or upload pipeline.
+- Analysis-dependent steps remain visible in the blueprint and are marked **HELD**. AgentCut never claims to have removed silence, generated captions, polished audio, or selected highlights without the required media evidence.
+- The static site intentionally has no `package.json`, so npm build and lint scripts are not part of the product.
 
 ## Manual verification
 
-1. Open `index.html`.
-2. Import a local video.
-3. Select the item in the library and play the preview.
-4. Add the item to the timeline by double-clicking or using the `Timeline` button.
-5. Select the clip, remove it, undo, and redo.
-6. Select a clip, move the playhead inside it, and enter `split the selected clip at the playhead`.
-7. Approve the plan and confirm that two clips appear in the timeline with an operation entry in history.
-8. Use `Ctrl/Cmd+Z` to verify undo. Also test `create a vertical video` and approve the sequence change.
-9. Enter `remove silences` to confirm that the request becomes a reviewable plan without claiming an analysis that did not happen.
-10. Save, reload the page, and export the project to validate the downloaded JSON.
+1. Open the app and import a local MP4.
+2. In Agent Director, enter a complete brief such as `Turn this footage into a 45-second vertical reel with captions, clean audio, and no dead air.`
+3. Confirm that the blueprint identifies the source, requests 9:16 delivery, and marks analysis-dependent steps as held.
+4. Approve once and confirm that the source appears on the timeline, the sequence becomes `1080 × 1920 · 9:16`, progress is reported, and the mission log is updated.
+5. Use undo and redo to verify that the entire mission is reversible as one edit.
+6. Try `Create a vertical video up to 60 seconds.` and `Remove the selected clip.` to confirm that the original atomic operations still work.
+7. Save, reload, and export the project manifest.
 
-## Minimum agent contract
+## Architecture
 
-Observable state is available through `window.AgentCut.getState()`. A safe context for an agent is available through `window.AgentCut.agent.getContext()`. It reports assets, sequence, tracks, selection, available capabilities, and the approval policy. Mutable operations always go through the plan-and-approval flow, never through direct state writes.
+The current runtime is intentionally small:
 
-The existing diagrams and architecture documentation in `docs/` are preserved.
+- `project.js` owns state, persistence, snapshots, history, and manifest export.
+- `agent.js` interprets the brief, creates the blueprint, renders mission state, and executes the composite full-edit command.
+- `timeline.js` owns track-safe mutations and dispatches the composite agent operation.
+- `app.js` binds browser events and renders the application shell.
+
+The diagrams in `docs/architecture/` describe this local flow. The future architecture can add transcript, audio, vision, render, and export workers behind the same explicit blueprint contract without making the current UI pretend those capabilities already exist.
 
 ## License
 

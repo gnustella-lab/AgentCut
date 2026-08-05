@@ -1,36 +1,25 @@
 sequenceDiagram
-    actor Human as Human
-    participant UI as UI or SDK
-    participant API as API
-    participant RT as Agent Editing Runtime
-    participant IDX as Multimodal context and index
-    participant POL as Policy Engine
-    participant OP as Operation Engine
-    participant Q as BullMQ
-    participant W as Worker
-    participant QC as Quality Control
-    participant DB as PostgreSQL
+    actor Human as User
+    participant UI as Agent Director UI
+    participant CTX as Project context
+    participant RT as Local Director runtime
+    participant BP as Edit Blueprint
+    participant POL as Approval policy
+    participant TL as Timeline engine
+    participant HIST as History and manifest
+    participant FUTURE as Future media workers
 
-    Human->>UI: Natural-language instruction
-    UI->>API: Create AgentSession
-    API->>RT: understand(instruction, constraints)
-    RT->>IDX: inspect project, media, and transcript
-    IDX-->>RT: evidence with time, model, and confidence
-    RT->>RT: generate structured plan
-    RT->>OP: simulate atomic operations
-    OP-->>RT: diff, duration, alerts, and cost
-    RT->>POL: check permissions, budget, and approval
-    POL-->>UI: Plan awaiting approval
-    Human->>UI: Approve or reject
-    UI->>API: Plan approval
-    API->>RT: execute plan
-    RT->>OP: apply operation with preconditions
-    OP->>DB: transaction, log, and projection
-    OP-->>RT: result and inverse operation
-    RT->>Q: analysis/render/QC jobs
-    Q->>W: execute idempotent job
-    W-->>DB: progress, logs, artifacts, and metrics
-    W->>QC: validate output
-    QC-->>RT: quality report
-    RT-->>UI: changes, reasons, confidence, and alerts
-    UI-->>Human: result, timeline, undo, and export
+    Human->>UI: Describe the desired outcome
+    UI->>CTX: Read media, selection, tracks, and sequence
+    CTX-->>RT: agentcut-context-v2
+    RT->>RT: Classify full-edit intent
+    RT->>BP: Build source, target, ordered steps, and readiness
+    BP-->>UI: Show blueprint and held analysis work
+    Human->>POL: Approve once for the complete mission
+    POL-->>RT: Approval granted
+    RT->>TL: Execute agent.full-edit composite command
+    TL->>TL: Add source, set target, preserve locks
+    TL->>HIST: Record before/after snapshots and audit entry
+    HIST-->>UI: Progress, mission log, and undo
+    RT-->>UI: Reviewable edit timeline
+    FUTURE-->>BP: Future transcript, audio, vision, or render evidence

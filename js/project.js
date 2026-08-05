@@ -60,6 +60,22 @@
     ];
   }
 
+  function createWorkflowState() {
+    return {
+      id: null,
+      title: null,
+      status: "idle",
+      stage: "Waiting for a brief",
+      progress: 0,
+      source: "Waiting for footage",
+      target: "Brief not set",
+      completed: 0,
+      total: 0,
+      deferred: 0,
+      steps: []
+    };
+  }
+
   function createInitialState(name) {
     var timestamp = now();
     return {
@@ -89,17 +105,18 @@
         tracks: createTracks()
       },
       agent: {
-        mode: "assistant",
+        mode: "autonomous",
         messages: [
           {
             id: createId("message"),
             role: "assistant",
-            text: "Hi. I am the local AgentCut runtime. I can propose a plan and execute only safe operations after your approval.",
+            text: "Tell me the outcome you want. I will map the footage into one complete edit mission and run it after your approval.",
             timestamp: timestamp
           }
         ],
         plans: [],
-        status: "idle"
+        status: "idle",
+        workflow: createWorkflowState()
       },
       history: {
         undoStack: [],
@@ -204,6 +221,7 @@
         mode: state.agent.mode,
         messages: cloneJSON(state.agent.messages),
         plans: cloneJSON(state.agent.plans),
+        workflow: cloneJSON(state.agent.workflow || createWorkflowState()),
         status: "idle"
       },
       history: {
@@ -320,6 +338,13 @@
       }) : [];
       state.timeline = normalizeTimeline(saved.timeline);
       state.agent = Object.assign(state.agent, saved.agent || {});
+      state.agent.workflow = Object.assign(createWorkflowState(), saved.agent && saved.agent.workflow ? saved.agent.workflow : {});
+      if (["autonomous", "assistant", "copilot", "supervised"].indexOf(state.agent.mode) === -1) {
+        state.agent.mode = "autonomous";
+      }
+      if (state.agent.mode === "copilot" || state.agent.mode === "supervised") {
+        state.agent.mode = "autonomous";
+      }
       state.agent.status = "idle";
       state.history.log = saved.history && Array.isArray(saved.history.log) ? saved.history.log : [];
       state.history.undoStack = [];
@@ -357,6 +382,7 @@
       timeline: cloneJSON(state.timeline),
       agentHistory: cloneJSON(state.agent.messages),
       agentPlans: cloneJSON(state.agent.plans),
+      agentWorkflow: cloneJSON(state.agent.workflow || createWorkflowState()),
       operationHistory: cloneJSON(state.history.log),
       exportedAt: now()
     };

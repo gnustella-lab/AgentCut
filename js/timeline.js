@@ -498,6 +498,9 @@
         return { ok: false, message: "The selection changed since the plan was created. Review the clip before approving." };
       }
     }
+    if (operation.type === "agent.full-edit") {
+      return AC.agent && typeof AC.agent.executeFullEdit === "function" ? AC.agent.executeFullEdit(currentState, operation) : { ok: false, message: "The full-edit runtime is not available." };
+    }
     if (operation.type === "timeline.remove-selected") {
       var removed = removeSelected(currentState, { silent: true, logType: "agent.operation.remove", logLabel: "Agent removed clip" });
       return removed ? { ok: true, changed: true, message: "Selected clip removed." } : { ok: false, message: "Could not remove the selected clip." };

@@ -684,7 +684,13 @@
     $("approve-plan-button").addEventListener("click", function () {
       var result = AC.agent.approveLatest(currentState);
       if (result && result.ok) {
-        showToast(result.executed ? "Plan approved and applied. Undo remains available." : "Plan marked as reviewed. No operation was applied.", "success");
+        if (result.executed && result.deferred) {
+          showToast("Full edit mission applied. " + result.deferred + " analysis-dependent steps remain held.", "success");
+        } else if (result.executed) {
+          showToast("Full edit mission applied. Undo remains available.", "success");
+        } else {
+          showToast("Plan marked as reviewed. No operation was applied.", "success");
+        }
       } else if (result && result.message) {
         showToast(result.message, "error");
       }
