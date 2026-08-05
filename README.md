@@ -75,3 +75,7 @@ The scripts are loaded as classic scripts, in order, so the file also works dire
 Observable state is available through `window.AgentCut.getState()`. A safe context for an agent is available through `window.AgentCut.agent.getContext()`. It reports assets, sequence, tracks, selection, available capabilities, and the approval policy. Mutable operations always go through the plan-and-approval flow, never through direct state writes.
 
 The existing diagrams and architecture documentation in `docs/` are preserved.
+
+## License
+
+AgentCut is released under the MIT License. See [LICENSE](LICENSE).
